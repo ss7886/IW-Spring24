@@ -1,2 +1,3 @@
 (test
- (name jacobi))
+ (name jacobi)
+ (libraries jacobi))
