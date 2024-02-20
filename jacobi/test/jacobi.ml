@@ -1,4 +1,4 @@
-open Jacobi
+open JacobiLib
 
 let listlist_to_arrarr (list :  float list list) : floatarray array =
   Array.of_list (List.map (Float.Array.of_list) list)

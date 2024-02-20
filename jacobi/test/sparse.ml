@@ -1,4 +1,4 @@
-open Jacobi
+open JacobiLib
 
 exception MismatchedVals
 
@@ -18,14 +18,16 @@ let dense2 = listlist_to_arrarr [
   [0.; 0.; 0.; 1.]
 ]
 
-let sparse1 = Sparse.SparseMatrix.dense_to_sparse matrix1
-let sparse2 = Sparse.SparseMatrix.dense_to_sparse matrix2
+let sparse1 = Sparse.SparseMatrix.dense_to_sparse dense1
+let sparse2 = Sparse.SparseMatrix.dense_to_sparse dense2
 
 let test_sparse (dense : floatarray array) (sparse : Sparse.SparseMatrix.matrix) : unit =
   let check_val (row : int) (col : int) (x : float) : unit = 
     if x = Sparse.SparseMatrix.get_val sparse row col then () else raise MismatchedVals
   in
   Array.iteri (fun row_num row -> Float.Array.iteri (check_val row_num) row) dense
+
+let _ = print_endline "Testing Sparse Matrices"
 
 let _ = test_sparse dense1 sparse1
 let _ = test_sparse dense2 sparse2
