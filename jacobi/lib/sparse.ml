@@ -55,7 +55,7 @@ module SparseMatrix : SparseSig = struct
     let vals = m.vals in
     let cols = m.cols in
     let row_ptr = m.row_ptr in 
-    let _ = assert (row < 0 || col < 0 || row >= n || col >= n) in
+    let _ = assert (row >= 0 && col >= 0 && row < n && col < n) in
     let start_index = Array.get row_ptr row in
     let stop_index = if row < (n - 1) then Array.get row_ptr (row + 1) else count in
     let rec find (index : int) (stop : int) : float =
