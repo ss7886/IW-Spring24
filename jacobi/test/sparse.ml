@@ -5,6 +5,10 @@ exception MismatchedVals
 let listlist_to_arrarr (list :  float list list) : floatarray array =
   Array.of_list (List.map (Float.Array.of_list) list)
 
+let print_vector (vec : floatarray) : unit = 
+  Float.Array.iter (fun x' -> (print_float x'; print_string " ")) vec;
+  print_newline ()
+
 let dense1 = listlist_to_arrarr [
   [3.; 1.; 0.; 0.];
   [2.; 2.5; 0.5; 0.];
@@ -28,6 +32,9 @@ let test_sparse (dense : floatarray array) (sparse : Sparse.SparseMatrix.matrix)
   Array.iteri (fun row_num row -> Float.Array.iteri (check_val row_num) row) dense
 
 let _ = print_endline "Testing Sparse Matrices"
+
+let _ = print_vector sparse1.vals
+let _ = print_vector sparse2.vals
 
 let _ = test_sparse dense1 sparse1
 let _ = test_sparse dense2 sparse2
