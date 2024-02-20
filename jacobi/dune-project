@@ -5,15 +5,11 @@
 (generate_opam_files true)
 
 (source
- (github username/reponame))
+ (github ss7886/IW-Spring24))
 
-(authors "Author Name")
-
-(maintainers "Maintainer Name")
+(authors "Samuel Sanft")
 
 (license LICENSE)
-
-(documentation https://url/to/documentation)
 
 (package
  (name jacobi)
