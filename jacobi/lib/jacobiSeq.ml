@@ -1,3 +1,5 @@
+open Sparse
+
 exception TooManyIters
 
 let arr_to_floatarr (arr : float array) : floatarray = 
@@ -17,7 +19,7 @@ let calc_x (matrix : floatarray array) (b : floatarray) (x : floatarray) =
   arr_to_floatarr x_arr
 
 let rec jacobi_aux (matrix : floatarray array) (b: floatarray) (x : floatarray)
-  (iters : int) : floatarray = 
+      (iters : int) : floatarray = 
   if iters > 1000 then raise TooManyIters else
   let new_x = calc_x matrix b x in
   let diff = Float.Array.map2 (-.) new_x x in
@@ -26,7 +28,6 @@ let rec jacobi_aux (matrix : floatarray array) (b: floatarray) (x : floatarray)
     print_endline ("Converged in " ^ (string_of_int iters) ^ " iterations."); 
     new_x
   ) else jacobi_aux matrix b new_x (iters + 1)
-
 
 let jacobi_seq (matrix : floatarray array) (b : floatarray) : floatarray =
   let n = Array.length matrix in
@@ -37,6 +38,33 @@ let jacobi_seq (matrix : floatarray array) (b : floatarray) : floatarray =
   let init = Float.Array.make n 0. in
   let x = jacobi_aux matrix b init 0 in
   let res = Float.Array.map2 (-.) (mat_vec_mult matrix x) b in
+  let res_sq = dot_product res res in (
+    print_endline ("Squared Error (||Ax - b||^2): " ^ (string_of_float res_sq));
+    x
+  )
+
+let calc_xi_sparse (matrix : SparseMatrix.matrix) (x: floatarray) (row : int)
+      (bi : float) : float =
+  (bi -. (SparseMatrix.mult_row_vec matrix row x) /. Float.Array.get matrix.diag row +. Float.Array.get x row)
+  (* (bi -. dot_product row x) /. Float.Array.get row i +. Float.Array.get x i *)
+
+let rec jacobi_sparse_aux (matrix : SparseMatrix.matrix) (b: floatarray) 
+      (x : floatarray) (iters : int) : floatarray = 
+  if iters > 1000 then raise TooManyIters else
+  let new_x = Float.Array.mapi (calc_xi_sparse matrix x) b in
+  let diff = Float.Array.map2 (-.) new_x x in
+  let diff_sq = dot_product diff diff in
+  if diff_sq < 0.0001 then (
+    print_endline ("Converged in " ^ (string_of_int iters) ^ " iterations."); 
+    new_x
+  ) else jacobi_sparse_aux matrix b new_x (iters + 1)
+
+let jacobi_sparse (matrix : SparseMatrix.matrix) (b : floatarray) : floatarray =
+  let n = matrix.n in
+  let _ = assert (Float.Array.length b = n) in
+  let init = Float.Array.make n 0. in
+  let x = jacobi_sparse_aux matrix b init 0 in
+  let res = Float.Array.map2 (-.) (SparseMatrix.mult_vec matrix x) b in
   let res_sq = dot_product res res in (
     print_endline ("Squared Error (||Ax - b||^2): " ^ (string_of_float res_sq));
     x
