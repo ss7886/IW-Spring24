@@ -1,16 +1,9 @@
 open JacobiLib
-open JacobiSeq
 open Sparse
 open SparseUtil
+open Util
 
 exception MismatchedVals
-
-let listlist_to_arrarr (list :  float list list) : floatarray array =
-  Array.of_list (List.map (Float.Array.of_list) list)
-
-(* let print_vector (vec : floatarray) : unit = 
-  Float.Array.iter (fun x' -> (print_float x'; print_string " ")) vec;
-  print_newline () *)
 
 let vec_eq (v1 : floatarray) (v2 : floatarray) : bool =
   let rec aux (i : int) : bool =
