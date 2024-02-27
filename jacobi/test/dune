@@ -1,3 +1,4 @@
 (tests
  (names sparse jacobi)
+ (deps (glob_files data/*))
  (libraries jacobiLib))

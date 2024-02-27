@@ -1,2 +1,3 @@
 (library
- (name jacobiLib))
+ (name jacobiLib)
+ (libraries csv))
