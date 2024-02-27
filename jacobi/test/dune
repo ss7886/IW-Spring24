@@ -1,4 +1,4 @@
 (tests
- (names sparse jacobi)
+ (names testSparse testJacobi)
  (deps (glob_files data/*))
  (libraries jacobiLib))
