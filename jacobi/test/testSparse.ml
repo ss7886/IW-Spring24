@@ -1,6 +1,6 @@
 open JacobiLib
 open Sparse
-open SparseUtil
+open CsvUtil
 open Util
 
 exception MismatchedVals
