@@ -1,18 +1,33 @@
 open Sparse
 
 exception BadFormat of string
+exception BadLine of string list
+
+let parse_int (line: string list) : int = 
+  match line with
+  | str :: [] -> int_of_string str
+  | _ -> raise (BadLine line)
+
+let rec parse_floats (line: string list) : float list = 
+  match line with
+  | [] -> []
+  | x :: tl -> float_of_string x :: parse_floats tl
+
+let read_entry (line: string list) : (int * int * float) = 
+  match line with
+  | row :: col :: x :: [] -> int_of_string row, int_of_string col, float_of_string x
+  | _ -> raise (BadLine line)
+
+let read_vec_from_csv (f: string) : floatarray = 
+  let data = Csv.load f in
+  let _, floats = (
+    match data with
+    | line1 :: line2 :: [] -> parse_int line1, parse_floats line2
+    | _ -> raise (BadFormat f)
+  ) in
+  Float.Array.of_list floats
 
 let read_sparse_from_csv (f: string) : SparseMatrix.matrix = 
-  let parse_int (line: string list) : int = 
-    match line with
-    | str :: [] -> int_of_string str
-    | _ -> raise (BadFormat f)
-  in
-  let read_entry (line: string list) : (int * int * float) = 
-    match line with
-    | row :: col :: x :: [] -> int_of_string row, int_of_string col, float_of_string x
-    | _ -> raise (BadFormat f)
-  in
   let data = Csv.load f in
   let n, entries, data' = (
     match data with
