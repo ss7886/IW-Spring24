@@ -32,9 +32,9 @@ let matrix3 = listlist_to_arrarr [
 
 let _ = print_endline "Testing Jacobi method in sequence on dense and sparse matrices"
 
-let sparse1 = SparseMatrix.dense_to_sparse matrix1
-let sparse2 = SparseMatrix.dense_to_sparse matrix2
-let sparse3 = SparseMatrix.dense_to_sparse matrix3
+let sparse1 = Square.dense_to_sparse matrix1
+let sparse2 = Square.dense_to_sparse matrix2
+let sparse3 = Square.dense_to_sparse matrix3
 
 let b1 = Float.Array.of_list [4.3; 3.2; 2.2; 3.1]
 let b2 = Float.Array.of_list [-2.2; 12.5; -0.2; 3.1]

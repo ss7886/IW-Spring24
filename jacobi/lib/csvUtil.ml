@@ -27,7 +27,7 @@ let read_vec_from_csv (f: string) : floatarray =
   ) in
   Float.Array.of_list floats
 
-let read_sparse_from_csv (f: string) : SparseMatrix.matrix = 
+let read_sparse_from_csv (f: string) : Square.t = 
   let data = Csv.load f in
   let n, entries, data' = (
     match data with

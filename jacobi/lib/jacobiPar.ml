@@ -4,7 +4,7 @@ open Util
 
 exception TooManyIters
 
-let rec naive_aux (p : int) (matrix : SparseMatrix.matrix) (b: floatarray) 
+let rec naive_aux (p : int) (matrix : Square.t) (b: floatarray) 
       (x : floatarray) (iters : int) : floatarray = 
   if iters > 1000 then raise TooManyIters else
   let ax = par_mult_vec p matrix x in
@@ -18,12 +18,12 @@ let rec naive_aux (p : int) (matrix : SparseMatrix.matrix) (b: floatarray)
     new_x
   ) else naive_aux p matrix b new_x (iters + 1)
 
-let jacobi_par_naive (p : int) (matrix : SparseMatrix.matrix) (b : floatarray) : floatarray =
+let jacobi_par_naive (p : int) (matrix : Square.t) (b : floatarray) : floatarray =
   let n = matrix.n in
   let _ = assert (Float.Array.length b = n) in
   let init = Float.Array.make n 0. in
   let x = naive_aux p matrix b init 0 in
-  let res = Float.Array.map2 (-.) (SparseMatrix.mult_vec matrix x) b in
+  let res = Float.Array.map2 (-.) (Square.mult_vec matrix x) b in
   let res_sq = dot_product res res in (
     let _ = res_sq in ();
     (* print_endline ("Squared Error (||Ax - b||^2): " ^ (string_of_float res_sq)); *)
