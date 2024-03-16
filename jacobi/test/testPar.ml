@@ -9,8 +9,8 @@ let _ = par_mult_vec
 
 let _ = print_endline "Testing Parallel Multiplication"
 
-let a50 = read_sparse_from_csv "data/A-50-0.1.csv"
-let b50 = read_vec_from_csv "data/b-50-uniform.csv"
+let a50 = read_sparse_from_csv "data/A-1000-0.02.csv"
+let b50 = read_vec_from_csv "data/b-1000-uniform.csv"
 
 let seq = Square.mult_vec a50 b50
 let _ = seq
@@ -21,3 +21,5 @@ let par4 = par_mult_vec 4 a50 b50
 let _ = assert (vec_eq seq par1)
 let _ = assert (vec_eq seq par2)
 let _ = assert (vec_eq seq par4)
+
+let _ = assert (vec_eq seq par1)

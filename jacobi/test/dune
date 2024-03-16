@@ -1,4 +1,4 @@
 (tests
- (names testSparse testJacobi testPar testTiming)
+ (names testSparse testJacobi testPar testPar2)
  (deps (glob_files data/*))
  (libraries jacobiLib))
