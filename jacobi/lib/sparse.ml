@@ -105,6 +105,7 @@ module type SparseSquareSig = sig
   val get_val : t -> int -> int -> float
   val mult_vec : t -> floatarray -> floatarray
   val mult_row_vec : t -> int -> floatarray -> float
+  (* val split_cols : t -> int -> Matrix.t list *)
 end
 
 module Square : SparseSquareSig = struct
@@ -161,5 +162,30 @@ module Square : SparseSquareSig = struct
       aux 0;
       res
     )
+  
+  (* let split_cols (mat: t) (k: int) : Matrix.t list =
+    let counts = Array.make k 0 in
+    let _ = Array.iter (fun i -> 
+      let j = i * k / mat.n in
+      Array.set counts j (Array.get counts j + 1)
+    ) mat.cols in
+    let vals = Array.init k (fun i -> Float.Array.create (Array.get counts i)) in
+    let cols = Array.init k (fun i -> Array.make (Array.get counts i) 0) in
+    let rows = Array.init k (fun i -> Array.make mat.n 0) in
+    let indices = Array.make k 0 in
+    let next_row = ref 0 in
+    let row_num = ref (-1) in
+    let _ = Array.iteri  (fun old_i col ->
+      if old_i = !next_row then (
+        
+      );
+      let x = Float.Array.get mat.vals old_i in
+      let j = col * k / mat.n in
+      let new_i = Array.get indices j in
+      let new_col = (((col * k) mod mat.n) / k) in (
+        Float.Array.set (Array.get vals j) new_i x;
+        Array.set (Array.get cols j) new_i new_col
+      )
+    ) mat.cols in *)
 
 end
