@@ -14,16 +14,7 @@ open Sparse
 
 let par_mult_vec (p: int) (mat: Matrix.t) (b: floatarray) : floatarray =
   let mult_block (start: int) (stop: int) : floatarray = 
-    let res = Float.Array.create (stop - start) in
-    let rec aux (i: int) : unit = 
-      if i = stop then () else (
-        Float.Array.set res (i - start) (Matrix.mult_row_vec mat b i);
-        aux (i + 1)
-      )
-    in (
-      aux start;
-      res
-    )
+    Float.Array.init (stop - start) (fun i -> Matrix.mult_row_vec mat b (start + i))
   in
   let init_domain (i: int) = 
     Domain.spawn (fun _ -> mult_block (i * mat.num_rows / p) ((i + 1) * mat.num_rows / p))
