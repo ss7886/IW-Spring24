@@ -34,6 +34,11 @@ let fibTwice (n: int) : int =
   let r2 = Domain.join d2 in
   r2
 
+let fibTwice2 (n: int) : int =
+  let d1 = Domain.spawn (fun _ -> fibSeq n) in
+  let _ = fibSeq 42 in
+  Domain.join d1
+
 let timer (f: unit -> unit) (iters: int) : unit = 
   let t = Sys.time() in
   let rec aux (i : int) : unit =
@@ -67,5 +72,6 @@ let _ = timer (fun _ -> let _ = fibParN 42 4 in ()) 1 *)
 
 let _ = timer (fun _ -> let _ = fibSeq 42 in ()) 1
 let _ = timer (fun _ -> let _ = fibTwice 42 in ()) 1
+let _ = timer (fun _ -> let _ = fibTwice2 42 in ()) 1
 
 let _ = print_int (Domain.recommended_domain_count ())
