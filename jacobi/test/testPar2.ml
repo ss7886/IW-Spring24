@@ -1,7 +1,5 @@
 let rec fibSeq (n: int) : int = 
-  if n = 1 then 0 else
-    if n = 2 then 1 else
-      fibSeq (n - 1) + fibSeq (n - 2)
+  if n < 2 then 1 else fibSeq (n - 1) + fibSeq (n - 2)
 
 let fibPar (n: int) (p: int) : int = 
   if n < 20 || p = 1 then (
