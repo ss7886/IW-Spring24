@@ -27,8 +27,8 @@ let fibParN (n: int) (p: int) : int =
   List.nth r 0
 
 let fibTwice (n: int) : int = 
-  let d1 = Domain.spawn (fun _ -> fibSeq n) in
-  let d2 = Domain.spawn (fun _ -> fibSeq n) in
+  let d1 = Domain.spawn (fun _ -> let time = Sys.time () in Domain.at_exit(fun _ -> print_float (Sys.time () -. time); print_newline ()); fibSeq n) in
+  let d2 = Domain.spawn (fun _ -> let time = Sys.time () in Domain.at_exit(fun _ -> print_float (Sys.time () -. time); print_newline ()); fibSeq n) in
   let r1 = Domain.join d1 in
   Printf.printf "fib(%d) = %d\n%!" n r1;
   let r2 = Domain.join d2 in
