@@ -67,7 +67,7 @@ let _ = timer (fun _ -> let _ = fibParN 42 1 in ()) 1
 let _ = timer (fun _ -> let _ = fibParN 42 2 in ()) 1
 let _ = timer (fun _ -> let _ = fibParN 42 4 in ()) 1 *)
 
-let _ = timer (fun _ -> let _ = fibSeq 42 in ()) 10
-let _ = timer (fun _ -> let _ = fibTwice 42 in ()) 5
+let _ = timer (fun _ -> let _ = fibSeq 42 in ()) 1
+let _ = timer (fun _ -> let _ = fibTwice 42 in ()) 1
 
 let _ = print_int (Domain.recommended_domain_count ())
