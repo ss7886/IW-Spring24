@@ -31,10 +31,12 @@ let fibParN (n: int) (p: int) : int =
 let fibTwice (n: int) : int = 
   let d1 = Domain.spawn (fun _ -> fibSeq n) in
   let d2 = Domain.spawn (fun _ -> fibSeq n) in
-  let r1 = Domain.join d1 in
-  Printf.printf "fib(%d) = %d\n%!" n r1;
-  let r2 = Domain.join d2 in
-  r2
+  (
+    let r1 = Domain.join d1 in
+    Printf.printf "fib(%d) = %d\n%!" n r1;
+    let r2 = Domain.join d2 in
+    r2
+  )
 
 let timer (f: unit -> unit) (iters: int) : unit = 
   let t = Sys.time() in
