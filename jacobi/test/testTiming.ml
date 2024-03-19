@@ -49,11 +49,11 @@ let _ = timer (fun _ -> let _ = par_mult_vec 3 a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 4 a10_000 b10_000 in ()) 100 *)
 
 
-let _ = timer (fun _ -> let _ = jacobi_sparse a10_000 b10_000 in ()) 100
-let _ = timer (fun _ -> let _ = jacobi_par_naive 1 a10_000 b10_000 in ()) 100
-let _ = timer (fun _ -> let _ = jacobi_par_naive 2 a10_000 b10_000 in ()) 100
-let _ = timer (fun _ -> let _ = jacobi_par_naive 4 a10_000 b10_000 in ()) 100
-let _ = timer (fun _ -> let _ = jacobi_par_naive 8 a10_000 b10_000 in ()) 100
+let _ = timer (fun _ -> let _ = jacobi_sparse a10_000 b10_000 in ()) 20
+let _ = timer (fun _ -> let _ = jacobi_par_naive 1 a10_000 b10_000 in ()) 20
+let _ = timer (fun _ -> let _ = jacobi_par_naive 2 a10_000 b10_000 in ()) 20
+let _ = timer (fun _ -> let _ = jacobi_par_naive 4 a10_000 b10_000 in ()) 20
+let _ = timer (fun _ -> let _ = jacobi_par_naive 8 a10_000 b10_000 in ()) 20
 (* let _ = timer (fun _ -> let _ = jacobi_par_naive 8 a10_000 b10_000 in ()) 10 *)
 
 (* let _ = print_int (Domain.recommended_domain_count ()); print_newline () *)
