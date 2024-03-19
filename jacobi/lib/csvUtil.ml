@@ -27,7 +27,7 @@ let read_vec_from_csv (f: string) : floatarray =
   ) in
   Float.Array.of_list floats
 
-let read_sparse_from_csv (f: string) : Square.t = 
+let read_sparse_from_csv (f: string) : Matrix.t = 
   let data = Csv.load f in
   let n, entries, data' = (
     match data with
@@ -36,15 +36,9 @@ let read_sparse_from_csv (f: string) : Square.t =
   ) in
   let vals = Float.Array.create entries in
   let cols = Array.make entries 0 in
-  let diag = Float.Array.create n in
   let rows = Array.make n 0 in
-  let diagFilled = ref false in
   let rec update_rows (prev : int) (current : int) (i : int) : unit =
     if prev = current then () else (
-      if not !diagFilled && prev > 0 then (
-        Float.Array.set diag prev 0.
-      ) else ();
-      diagFilled := false;
       Array.set rows current i;
       update_rows (prev + 1) current i
     ) 
@@ -55,14 +49,6 @@ let read_sparse_from_csv (f: string) : Square.t =
     | line :: tl -> 
       let row, col, x = read_entry line in (
         if row > prev_row then update_rows prev_row row i else ();
-        if row = col then (
-          diagFilled := true;
-          Float.Array.set diag row x
-        ) else ();
-        if row > col && not !diagFilled then (
-          diagFilled := true;
-          Float.Array.set diag row x
-        ) else ();
         Float.Array.set vals i x;
         Array.set cols i col;
         aux tl (i + 1) row
@@ -70,5 +56,5 @@ let read_sparse_from_csv (f: string) : Square.t =
   in 
   (
     aux data' 0 (-1);
-    {n=n; count=entries; vals=vals; cols=cols; diag=diag; row_ptr=rows}
+    {num_rows=n; num_cols=n; count=entries; vals=vals; cols=cols; row_ptr=rows}
   )

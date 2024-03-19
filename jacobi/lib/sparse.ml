@@ -12,7 +12,10 @@ module type SparseSig = sig
 
   val get_val : t -> int -> int -> float
   val mult_vec : t -> floatarray -> floatarray
-  val mult_row_vec : t -> int -> floatarray -> float
+  val mult_row_vec : t -> floatarray -> int -> float
+  val mult_LU : t -> floatarray -> int -> floatarray
+  val diag : t -> floatarray
+  val diag_block : t -> int -> floatarray array array
 end
 
 module Matrix : SparseSig = struct
@@ -66,7 +69,7 @@ module Matrix : SparseSig = struct
           find (index + 1) stop
     in find start_index stop_index
   
-  let mult_row_vec (m : t) (row : int) (b : floatarray) : float = 
+  let mult_row_vec (m : t) (b : floatarray) (row : int) : float = 
     let start_index = Array.get m.row_ptr row in
     let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
     let rec aux (i : int) (stop : int) : float =
@@ -78,36 +81,56 @@ module Matrix : SparseSig = struct
     in aux start_index end_index
   
   let mult_vec (m : t) (b : floatarray) : floatarray =
-    let res = Float.Array.create m.num_rows in
-    let rec aux (i : int) : unit =
-      if i = m.num_rows then () else (
-        Float.Array.set res i (mult_row_vec m i b);
-        aux (i + 1)
-      )
+    Float.Array.init m.num_rows (mult_row_vec m b)
+
+  let mult_row_LU (m : t) (b : floatarray) (block_size : int) (row : int) : float = 
+    let start_index = Array.get m.row_ptr row in
+    let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
+    let rec aux (i : int) (stop : int) : float =
+      if i = stop then 0. else
+        let col = Array.get m.cols i in
+        if row / block_size = col / block_size then 0. +. aux (i + 1) stop else
+          let m_val = Float.Array.get m.vals i in
+          let b_val = Float.Array.get b col in
+          m_val *. b_val +. aux (i + 1) stop
+    in aux start_index end_index
+
+  let mult_LU (m : t) (b : floatarray) (block_size : int) : floatarray = 
+    Float.Array.init m.num_rows (mult_row_LU m b block_size)
+  
+  let diag (m : t) : floatarray = 
+    Float.Array.init (min m.num_cols m.num_rows) (fun i -> get_val m i i)
+  
+  let diag_block (m : t) (block_size : int) : floatarray array array = 
+    let diag_length = min m.num_cols m.num_rows in
+    let init_zeroes (size : int) : floatarray array =
+      Array.init size (fun _ -> Float.Array.make size 0.)
+    in
+    let res = Array.init (diag_length / block_size) (fun _ -> init_zeroes block_size) in
+    let fill_vals (row : int) : unit =
+      let start_index = Array.get m.row_ptr row in
+      let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
+      let rec aux (i : int) : unit =
+        let col = Array.get m.cols i in
+        if col / block_size > row / block_size || i = end_index then () else
+        if col / block_size = row / block_size then (
+          let block = row / block_size in
+          let block_col = col mod block_size in
+          let block_row = row mod block_size in
+          let x = Float.Array.get m.vals start_index in
+          Float.Array.set (Array.get (Array.get res block) block_row) block_col x
+        ) else aux (i + 1)
+      in aux start_index
     in (
-      aux 0;
+      for row = 0 to diag_length do
+        fill_vals row
+      done;
       res
     )
 end
 
-module type SparseSquareSig = sig
-  type t = {
-    n : int;
-    count : int;
-    vals : floatarray;
-    cols : int array;
-    diag : floatarray;
-    row_ptr : int array;
-  }
 
-  val dense_to_sparse : floatarray array -> t
-
-  val get_val : t -> int -> int -> float
-  val mult_vec : t -> floatarray -> floatarray
-  val mult_row_vec : t -> int -> floatarray -> float
-  (* val split_cols : t -> int -> Matrix.t list *)
-end
-
+(* 
 module Square : SparseSquareSig = struct
   type t = {
     n : int;
@@ -188,4 +211,4 @@ module Square : SparseSquareSig = struct
       )
     ) mat.cols in *)
 
-end
+end *)

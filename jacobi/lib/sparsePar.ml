@@ -12,12 +12,12 @@ open Sparse
     SparseMatrix.mult_vec mat b
   ) *)
 
-let par_mult_vec (p: int) (mat: Square.t) (b: floatarray) : floatarray =
+let par_mult_vec (p: int) (mat: Matrix.t) (b: floatarray) : floatarray =
   let mult_block (start: int) (stop: int) : floatarray = 
     let res = Float.Array.create (stop - start) in
     let rec aux (i: int) : unit = 
       if i = stop then () else (
-        Float.Array.set res (i - start) (Square.mult_row_vec mat i b);
+        Float.Array.set res (i - start) (Matrix.mult_row_vec mat b i);
         aux (i + 1)
       )
     in (
@@ -26,7 +26,7 @@ let par_mult_vec (p: int) (mat: Square.t) (b: floatarray) : floatarray =
     )
   in
   let init_domain (i: int) = 
-    Domain.spawn (fun _ -> mult_block (i * mat.n / p) ((i + 1) * mat.n / p))
+    Domain.spawn (fun _ -> mult_block (i * mat.num_rows / p) ((i + 1) * mat.num_rows / p))
   in
   let domains = List.init p init_domain in 
   let subs = (List.map (fun d -> Domain.join d) domains) in
@@ -38,7 +38,7 @@ let par_mult_vec2 (ver: int) (hor: int) (cols: Matrix.t list) (b: floatarray) : 
     let res = Float.Array.create (stop - start) in
     let rec aux (i: int) : unit = 
       if i = stop then () else (
-        Float.Array.set res (i - start) (Matrix.mult_row_vec mat i b_sub);
+        Float.Array.set res (i - start) (Matrix.mult_row_vec mat b_sub i);
         aux (i + 1)
       )
     in (
