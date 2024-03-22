@@ -1,5 +1,3 @@
-open Sparse
-
 exception BadFormat of string
 exception BadLine of string list
 
@@ -27,7 +25,7 @@ let read_vec_from_csv (f: string) : floatarray =
   ) in
   Float.Array.of_list floats
 
-let read_sparse_from_csv (f: string) : Matrix.t = 
+let read_sparse_from_csv (f: string) : Sparse.t = 
   let data = Csv.load f in
   let n, entries, data' = (
     match data with

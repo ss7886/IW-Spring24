@@ -1,6 +1,5 @@
 open JacobiLib
 open JacobiSeq
-open Sparse
 open Util
 
 let matrix1 = listlist_to_arrarr [
@@ -32,9 +31,9 @@ let matrix3 = listlist_to_arrarr [
 
 let _ = print_endline "Testing Jacobi method in sequence on dense and sparse matrices"
 
-let sparse1 = Matrix.dense_to_sparse matrix1
-let sparse2 = Matrix.dense_to_sparse matrix2
-let sparse3 = Matrix.dense_to_sparse matrix3
+let sparse1 = Sparse.dense_to_sparse matrix1
+let sparse2 = Sparse.dense_to_sparse matrix2
+let sparse3 = Sparse.dense_to_sparse matrix3
 
 let b1 = Float.Array.of_list [4.3; 3.2; 2.2; 3.1]
 let b2 = Float.Array.of_list [-2.2; 12.5; -0.2; 3.1]

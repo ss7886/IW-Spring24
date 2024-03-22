@@ -2,12 +2,11 @@ open JacobiLib
 open JacobiSeq
 open JacobiPar
 open SparsePar
-open Sparse
 open CsvUtil
 open Util
 
 let _ = print_vector
-let _ = Matrix.mult_vec
+let _ = Sparse.mult_vec
 let _ = par_mult_vec
 
 
@@ -42,7 +41,7 @@ let x1 = jacobi_sparse a10_000 b10_000
 let x2 = jacobi_par_naive 4 a10_000 b10_000
 let _ = assert (vec_eq x1 x2)
 
-let _ = timer (fun _ -> let _ = Matrix.mult_vec a10_000 b10_000 in ()) 100
+let _ = timer (fun _ -> let _ = Sparse.mult_vec a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 1 a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 2 a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 4 a10_000 b10_000 in ()) 100

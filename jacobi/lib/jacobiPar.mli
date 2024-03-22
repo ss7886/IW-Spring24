@@ -1,3 +1,1 @@
-open Sparse
-
-val jacobi_par_naive : int -> Matrix.t -> floatarray -> floatarray
+val jacobi_par_naive : int -> Sparse.t -> floatarray -> floatarray

@@ -6,11 +6,12 @@ let print_vector (vec : floatarray) : unit =
   print_newline ()
 
 let vec_eq (v1 : floatarray) (v2 : floatarray) : bool =
+  let delta = 0.000000001 in
   let rec aux (i : int) : bool =
     if i = Float.Array.length(v1) then true else
       let f1 = Float.Array.get v1 i in
       let f2 = Float.Array.get v2 i in
-      if f1 = f2 then aux (i + 1) else (
+      if abs_float (f1 -. f2) < delta then aux (i + 1) else (
       print_float f1;
       print_string " =/= ";
       print_float f2;

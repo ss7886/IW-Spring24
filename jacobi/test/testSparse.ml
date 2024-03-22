@@ -1,9 +1,10 @@
 open JacobiLib
-open Sparse
 open CsvUtil
 open Util
 
 exception MismatchedVals
+
+let _ = print_endline "Testing Sparse Matrices"
 
 let dense1 = listlist_to_arrarr [
   [3.; 1.; 0.; 0.];
@@ -22,16 +23,14 @@ let b1 = Float.Array.of_list [4.3; 3.2; 2.2; 3.1]
 let b2 = Float.Array.of_list [-2.2; 12.5; -0.2; 3.1]
 let b3 = Float.Array.of_list [0.0; 1.0; 2.0; 4.0]
 
-let sparse1 = Matrix.dense_to_sparse dense1
-let sparse2 = Matrix.dense_to_sparse dense2
+let sparse1 = Sparse.dense_to_sparse dense1
+let sparse2 = Sparse.dense_to_sparse dense2
 
-let test_sparse (dense : floatarray array) (sparse : Matrix.t) : unit =
+let test_sparse (dense : floatarray array) (sparse : Sparse.t) : unit =
   let check_val (row : int) (col : int) (x : float) : unit = 
-    if x = Matrix.get_val sparse row col then () else raise MismatchedVals
+    if x = Sparse.get_val sparse row col then () else raise MismatchedVals
   in
   Array.iteri (fun row_num row -> Float.Array.iteri (check_val row_num) row) dense
-
-let _ = print_endline "Testing Sparse Matrices"
 
 (* let _ = print_vector sparse1.vals
 let _ = print_vector sparse2.vals *)
@@ -48,9 +47,9 @@ let _ = assert (csv2 = sparse2)
 (* let _ = print_vector (mat_vec_mult dense1 b1)
 let _ = print_vector (Matrix.mult_vec sparse1 b1) *)
 
-(* let _ = assert (vec_eq (mat_vec_mult dense1 b1) (Matrix.mult_vec sparse1 b1)) *)
-let _ = assert (vec_eq (mat_vec_mult dense1 b2) (Matrix.mult_vec sparse1 b2))
-let _ = assert (vec_eq (mat_vec_mult dense1 b3) (Matrix.mult_vec sparse1 b3))
-let _ = assert (vec_eq (mat_vec_mult dense2 b1) (Matrix.mult_vec sparse2 b1))
-let _ = assert (vec_eq (mat_vec_mult dense2 b2) (Matrix.mult_vec sparse2 b2))
-let _ = assert (vec_eq (mat_vec_mult dense2 b3) (Matrix.mult_vec sparse2 b3))
+let _ = assert (vec_eq (mat_vec_mult dense1 b1) (Sparse.mult_vec sparse1 b1))
+let _ = assert (vec_eq (mat_vec_mult dense1 b2) (Sparse.mult_vec sparse1 b2))
+let _ = assert (vec_eq (mat_vec_mult dense1 b3) (Sparse.mult_vec sparse1 b3))
+let _ = assert (vec_eq (mat_vec_mult dense2 b1) (Sparse.mult_vec sparse2 b1))
+let _ = assert (vec_eq (mat_vec_mult dense2 b2) (Sparse.mult_vec sparse2 b2))
+let _ = assert (vec_eq (mat_vec_mult dense2 b3) (Sparse.mult_vec sparse2 b3))
