@@ -1,0 +1,17 @@
+type t = {
+    num_rows : int;
+    num_cols : int;
+    vals : floatarray array;
+}
+
+val from_arr : floatarray array -> t
+val from_list : float list list -> t
+val copy : t -> t
+val eq : t -> t -> bool
+val get_val : t -> int -> int -> float
+val set_val : t -> int -> int -> float -> unit
+val mult_vec : t -> floatarray -> floatarray
+val mult_row_vec : t -> floatarray -> int -> float
+val decomp_LU : t -> t * t
+(* val mult_LU : t -> floatarray -> int -> floatarray
+val mult_row_LU : t -> floatarray -> int -> int -> float *)
