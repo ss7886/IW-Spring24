@@ -32,6 +32,9 @@ let get_val (matrix : t) (i : int) (j : int) : float =
 let set_val (matrix : t) (i : int) (j : int) (x : float) : unit =
   Float.Array.set (Array.get matrix.vals i) j x
 
+let get_row (matrix : t) (i : int) : floatarray =
+  Array.get matrix.vals i
+
 let mult_vec (matrix : t) (b : floatarray) : floatarray =
   let _ = assert (matrix.num_cols = Float.Array.length b) in
   arr_to_floatarr (Array.map (dot_product b) matrix.vals)
@@ -40,45 +43,87 @@ let mult_row_vec (matrix : t) (b : floatarray) (row : int) : float =
   let _ = assert (matrix.num_cols = Float.Array.length b) in
   dot_product (Array.get matrix.vals row) b
 
-let rec decomp_aux (l_mat : t) (u_mat : t) (k : int) : unit = 
-  if k = u_mat.num_rows - 1 then () else
-  let a = get_val u_mat k k in
+let rec decomp_aux (mat_L : t) (mat_U : t) (k : int) : unit = 
+  if k = mat_U.num_rows - 1 then () else
+  let a = get_val mat_U k k in
   let c = 1. /. a in
   let rec set_cv (i : int) : unit =
-    if i = l_mat.num_rows then () else (
-      set_val l_mat i k (c *. get_val u_mat i k);
+    if i = mat_L.num_rows then () else (
+      set_val mat_L i k (c *. get_val mat_U i k);
       set_cv (i + 1)
     )
   in
   set_cv (k + 1);
   let rec set_zeroes (i : int) : unit = 
-    if i = u_mat.num_rows then () else (
-      set_val u_mat i k 0.;
+    if i = mat_U.num_rows then () else (
+      set_val mat_U i k 0.;
       set_zeroes (i + 1)
     )
   in
   set_zeroes (k + 1);
   let rec sub_cvw (i : int) : unit =
-    if i = u_mat.num_rows then () else
-    let rec sub_cvw_row (j : int) : unit = 
-      if j = u_mat.num_cols then () else
-      let x = get_val u_mat i j in
-      let v = get_val l_mat i k in
-      let w = get_val u_mat k j in
-      set_val u_mat i j (x -. v *. w);
-      sub_cvw_row (j + 1)
-    in
-    sub_cvw_row (k + 1);
+    if i = mat_U.num_rows then () else
+    let v = get_val mat_L i k in
+    if v = 0. then () else (
+      let rec sub_cvw_row (j : int) : unit = 
+        if j = mat_U.num_cols then () else
+        let x = get_val mat_U i j in
+        let w = get_val mat_U k j in
+        set_val mat_U i j (x -. v *. w);
+        sub_cvw_row (j + 1)
+      in
+      sub_cvw_row (k + 1)
+    );
     sub_cvw (i + 1)
   in
   sub_cvw (k + 1);
-  decomp_aux l_mat u_mat (k + 1)
+  decomp_aux mat_L mat_U (k + 1)
 
 let decomp_LU (matrix : t) : t * t =
   let _ = assert (matrix.num_rows = matrix.num_cols) in
   let n = matrix.num_rows in
   let l_vals = Array.init n (fun i -> Float.Array.init n (fun j -> if i = j then 1. else 0.)) in
-  let l_mat = from_arr l_vals in
-  let u_mat = copy matrix in
-  decomp_aux l_mat u_mat 0;
-  (l_mat, u_mat)
+  let mat_L = from_arr l_vals in
+  let mat_U = copy matrix in
+  decomp_aux mat_L mat_U 0;
+  (mat_L, mat_U)
+
+(* val solve_L : t -> floatarray -> floatarray
+val solve_U : t -> floatarray -> floatarray
+val solve_LU : t -> t -> floatarray -> floatarray *)
+
+let solve_L (mat_L : t) (b : floatarray) : floatarray = 
+  let _ = assert (mat_L.num_rows = mat_L.num_cols) in
+  let n = mat_L.num_rows in
+  let res = Float.Array.make n 0. in
+  let rec aux (i : int) : unit = 
+    if i = n then () else
+    let row = get_row mat_L i in
+    let a = Float.Array.get row i in
+    let b_i = Float.Array.get b i in 
+    let x = (b_i -. partial_dot_product row 0 b 0 (i - 1)) /. a in
+    Float.Array.set res i x;
+    aux (i + 1)
+  in
+  aux 0;
+  res
+
+let solve_U (mat_U : t) (b : floatarray) : floatarray = 
+  let _ = assert (mat_U.num_rows = mat_U.num_cols) in
+  let n = mat_U.num_rows in
+  let res = Float.Array.make n 0. in
+  let rec aux (i : int) : unit = 
+    if i = -1 then () else
+    let row = get_row mat_U i in
+    let a = Float.Array.get row i in
+    let b_i = Float.Array.get b i in 
+    let x = (b_i -. partial_dot_product row (i + 1) b (i + 1) (n - i - 1)) /. a in
+    Float.Array.set res i x;
+    aux (i + 1)
+  in
+  aux 0;
+  res
+
+let solve_LU (mat_L : t) (mat_U : t) (b : floatarray) : floatarray = 
+  let b1 = solve_L mat_L b in
+  solve_U mat_U b1

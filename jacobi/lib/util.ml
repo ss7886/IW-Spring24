@@ -5,6 +5,7 @@ let print_vector (vec : floatarray) : unit =
   Float.Array.iter (fun x' -> (print_float x'; print_string " ")) vec;
   print_newline ()
 
+(* Checks whether v1 and v2 are element-wise equal (1e-9 precision). *)
 let vec_eq (v1 : floatarray) (v2 : floatarray) : bool =
   let delta = 0.000000001 in
   let rec aux (i : int) : bool =
@@ -25,6 +26,20 @@ let arr_to_floatarr (arr : float array) : floatarray =
 
 let dot_product (vec1 : floatarray) (vec2 : floatarray) : float = 
   Float.Array.fold_left (+.) 0. (Float.Array.map2 ( *.) vec1 vec2)
+
+(* Computes a partial dot product of n elements starting at start1 in vec1 and
+ * start2 in vec2. *)
+let partial_dot_product (vec1 : floatarray) (start1 : int) (vec2 : floatarray)
+    (start2 : int) (n : int) : float = 
+  let _ = assert (start1 >= 0 && start1 + n <= Float.Array.length vec1) in
+  let _ = assert (start2 >= 0 && start2 + n <= Float.Array.length vec2) in
+  let rec aux (i1 : int) (i2 : int) : float = 
+    if i1 = start1 + n then 0. else
+      let x1 = Float.Array.get vec1 i1 in
+      let x2 = Float.Array.get vec2 i2 in
+      x1 *. x2 +. aux (i1 + 1) (i2 + 1)
+  in
+  aux start1 start2
 
 let mat_vec_mult (matrix : floatarray array) (vec : floatarray) : floatarray = 
   arr_to_floatarr (Array.map (dot_product vec) matrix)
