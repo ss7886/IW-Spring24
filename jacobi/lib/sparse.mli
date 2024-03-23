@@ -7,7 +7,7 @@ type t = {
     row_ptr : int array;
   }
 
-val dense_to_sparse : floatarray array -> t
+val dense_to_sparse : Dense.t -> t
 
 val get_val : t -> int -> int -> float
 val mult_vec : t -> floatarray -> floatarray

@@ -5,11 +5,11 @@ exception TooManyIters
 let calc_xi (b : floatarray) (x: floatarray) (i : int) (row : floatarray) : float =
   (Float.Array.get b i -. dot_product row x) /. Float.Array.get row i +. Float.Array.get x i
 
-let calc_x (matrix : floatarray array) (b : floatarray) (x : floatarray) = 
-  let x_arr = Array.mapi (calc_xi b x) matrix in
+let calc_x (matrix : Dense.t) (b : floatarray) (x : floatarray) = 
+  let x_arr = Array.mapi (calc_xi b x) matrix.vals in
   arr_to_floatarr x_arr
 
-let rec jacobi_aux (matrix : floatarray array) (b: floatarray) (x : floatarray)
+let rec jacobi_aux (matrix : Dense.t) (b: floatarray) (x : floatarray)
       (iters : int) : floatarray = 
   if iters > 1000 then raise TooManyIters else
   let new_x = calc_x matrix b x in
@@ -20,15 +20,12 @@ let rec jacobi_aux (matrix : floatarray array) (b: floatarray) (x : floatarray)
     new_x
   ) else jacobi_aux matrix b new_x (iters + 1)
 
-let jacobi_seq (matrix : floatarray array) (b : floatarray) : floatarray =
-  let n = Array.length matrix in
-  let _ = (
-    assert (Float.Array.length b = n);
-    Array.iter (fun row -> assert(Float.Array.length row = n)) matrix
-  ) in
+let jacobi_seq (matrix : Dense.t) (b : floatarray) : floatarray =
+  let _ = assert (matrix.num_rows = matrix.num_cols) in
+  let n = matrix.num_rows in
   let init = Float.Array.make n 0. in
   let x = jacobi_aux matrix b init 0 in
-  let res = Float.Array.map2 ( -. ) (mat_vec_mult matrix x) b in
+  let res = Float.Array.map2 ( -. ) (Dense.mult_vec matrix x) b in
   let res_sq = dot_product res res in (
     let _ = res_sq in ();
     (* print_endline ("Squared Error (||Ax - b||^2): " ^ (string_of_float res_sq)); *)

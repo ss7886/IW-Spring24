@@ -7,16 +7,14 @@ type t = {
   row_ptr : int array;
 }
 
-let dense_to_sparse (dense : floatarray array) : t = 
-  let num_rows = Array.length dense in
-  let num_cols = Float.Array.length (Array.get dense 0) in
+let dense_to_sparse (dense : Dense.t) : t = 
   let count_row (count : int) (row : floatarray) : int = 
     Float.Array.fold_left (fun count x -> if x = 0. then count else count + 1) count row
   in
-  let count = Array.fold_left (count_row) 0 dense in
+  let count = Array.fold_left (count_row) 0 dense.vals in
   let vals = Float.Array.create count in
   let cols = Array.make count (-1) in
-  let row_ptr = Array.make num_rows (-1) in
+  let row_ptr = Array.make dense.num_rows (-1) in
   let index = ref 0 in
   let populate (col : int) (x : float) : unit = 
     if (x = 0.) then () else (
@@ -30,9 +28,9 @@ let dense_to_sparse (dense : floatarray array) : t =
     Float.Array.iteri populate row
   )
   in 
-  let _ = Array.iteri populate_row dense in
-  {num_rows=num_rows; num_cols=num_cols; count=count; vals=vals; cols=cols;
-    row_ptr=row_ptr}
+  let _ = Array.iteri populate_row dense.vals in
+  { num_rows=dense.num_rows; num_cols=dense.num_cols; count=count; vals=vals;
+    cols=cols; row_ptr=row_ptr }
 
 let get_val (m : t) (row : int) (col : int) : float = 
   let count = m.count in

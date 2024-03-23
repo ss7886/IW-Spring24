@@ -8,6 +8,22 @@ let print_vector (vec : floatarray) : unit =
 (* Checks whether v1 and v2 are element-wise equal (1e-9 precision). *)
 let vec_eq (v1 : floatarray) (v2 : floatarray) : bool =
   let delta = 0.000000001 in
+  if Float.Array.length v1 != Float.Array.length v2 then false else
+  let rec aux (i : int) : bool =
+    if i = Float.Array.length(v1) then true else
+      let f1 = Float.Array.get v1 i in
+      let f2 = Float.Array.get v2 i in
+      if abs_float (f1 -. f2) < delta then aux (i + 1) else (
+      print_float f1;
+      print_string " =/= ";
+      print_float f2;
+      print_newline ();
+      false
+    )
+  in aux 0
+
+let vec_close (v1 : floatarray) (v2 : floatarray) (delta : float) : bool = 
+  if Float.Array.length v1 != Float.Array.length v2 then false else
   let rec aux (i : int) : bool =
     if i = Float.Array.length(v1) then true else
       let f1 = Float.Array.get v1 i in
@@ -40,6 +56,3 @@ let partial_dot_product (vec1 : floatarray) (start1 : int) (vec2 : floatarray)
       x1 *. x2 +. aux (i1 + 1) (i2 + 1)
   in
   aux start1 start2
-
-let mat_vec_mult (matrix : floatarray array) (vec : floatarray) : floatarray = 
-  arr_to_floatarr (Array.map (dot_product vec) matrix)
