@@ -1,4 +1,4 @@
 (tests
- (names testDense testSparse)
+ (names testUtil testDense testSparse)
  (deps (glob_files data/*))
  (libraries jacobiLib unix))
