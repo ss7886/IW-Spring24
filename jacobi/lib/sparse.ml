@@ -78,13 +78,20 @@ let mult_LU (m : t) (b : floatarray) (block_size : int) : floatarray =
 let diag (m : t) : floatarray = 
   Float.Array.init (min m.num_cols m.num_rows) (fun i -> get_val m i i)
 
-let diag_block (m : t) (block_size : int) : floatarray array array = 
-  let diag_length = min m.num_cols m.num_rows in
+let diag_block (m : t) (block_size : int) : Dense.t array = 
+  let _ = assert (m.num_cols = m.num_rows) in
+  let n = m.num_cols in
   let init_zeroes (size : int) : floatarray array =
     Array.init size (fun _ -> Float.Array.make size 0.)
   in
-  let res = Array.init (diag_length / block_size) (fun _ -> init_zeroes block_size) in
-  let fill_vals (row : int) : unit =
+  let overflow = n mod block_size in
+  let num_blocks = n / block_size + if overflow > 0 then 1 else 0 in
+  let vals = Array.init num_blocks (fun i -> 
+    if i = n / block_size then init_zeroes block_size 
+    else init_zeroes overflow) in
+  let res = Array.map Dense.from_arr vals in
+  let fill_vals (row : int) : unit = 
+    if row = n then () else
     let start_index = Array.get m.row_ptr row in
     let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
     let rec aux (i : int) : unit =
@@ -95,12 +102,11 @@ let diag_block (m : t) (block_size : int) : floatarray array array =
         let block_col = col mod block_size in
         let block_row = row mod block_size in
         let x = Float.Array.get m.vals start_index in
-        Float.Array.set (Array.get (Array.get res block) block_row) block_col x
+        Dense.set_val (Array.get res block) block_row block_col x;
+        aux (i + 1)
       ) else aux (i + 1)
-    in aux start_index
-  in (
-    for row = 0 to diag_length do
-      fill_vals row
-    done;
-    res
-  )
+    in
+    aux start_index
+  in
+  fill_vals 0;
+  res
