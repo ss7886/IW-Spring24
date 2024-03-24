@@ -87,26 +87,28 @@ let diag_block (m : t) (block_size : int) : Dense.t array =
   let overflow = n mod block_size in
   let num_blocks = n / block_size + if overflow > 0 then 1 else 0 in
   let vals = Array.init num_blocks (fun i -> 
-    if i = n / block_size then init_zeroes block_size 
-    else init_zeroes overflow) in
+    if i = n / block_size then init_zeroes overflow 
+    else init_zeroes block_size) in
   let res = Array.map Dense.from_arr vals in
-  let fill_vals (row : int) : unit = 
+  let rec fill_vals (row : int) : unit = 
     if row = n then () else
-    let start_index = Array.get m.row_ptr row in
-    let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
+    let start = Array.get m.row_ptr row in
+    let stop = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
     let rec aux (i : int) : unit =
+      if i = stop then () else
       let col = Array.get m.cols i in
-      if col / block_size > row / block_size || i = end_index then () else
+      if col / block_size > row / block_size then () else
       if col / block_size = row / block_size then (
         let block = row / block_size in
         let block_col = col mod block_size in
         let block_row = row mod block_size in
-        let x = Float.Array.get m.vals start_index in
+        let x = Float.Array.get m.vals i in
         Dense.set_val (Array.get res block) block_row block_col x;
         aux (i + 1)
       ) else aux (i + 1)
     in
-    aux start_index
+    aux start;
+    fill_vals (row + 1)
   in
   fill_vals 0;
   res

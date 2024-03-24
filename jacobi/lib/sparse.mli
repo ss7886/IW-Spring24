@@ -15,4 +15,4 @@ val mult_row_vec : t -> floatarray -> int -> float
 val mult_LU : t -> floatarray -> int -> floatarray
 val mult_row_LU : t -> floatarray -> int -> int -> float
 val diag : t -> floatarray
-val diag_block : t -> int -> floatarray array array
+val diag_block : t -> int -> Dense.t array
