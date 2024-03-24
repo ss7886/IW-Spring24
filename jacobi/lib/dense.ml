@@ -26,6 +26,11 @@ let eq (mat1 : t) (mat2 : t) : bool =
   if mat1.num_cols != mat2.num_cols then false else
   Array.fold_left ( && ) true (Array.map2 vec_eq mat1.vals mat2.vals)
 
+let print (matrix : t) : unit =
+  print_endline "[";
+  Array.iter print_vector matrix.vals;
+  print_endline "]"
+
 let get_val (matrix : t) (i : int) (j : int) : float = 
   Float.Array.get (Array.get matrix.vals i) j
 
@@ -101,7 +106,7 @@ let solve_L (mat_L : t) (b : floatarray) : floatarray =
     let row = get_row mat_L i in
     let a = Float.Array.get row i in
     let b_i = Float.Array.get b i in 
-    let x = (b_i -. partial_dot_product row 0 b 0 (i - 1)) /. a in
+    let x = (b_i -. partial_dot_product row 0 res 0 i) /. a in
     Float.Array.set res i x;
     aux (i + 1)
   in
@@ -117,11 +122,11 @@ let solve_U (mat_U : t) (b : floatarray) : floatarray =
     let row = get_row mat_U i in
     let a = Float.Array.get row i in
     let b_i = Float.Array.get b i in 
-    let x = (b_i -. partial_dot_product row (i + 1) b (i + 1) (n - i - 1)) /. a in
+    let x = (b_i -. partial_dot_product row (i + 1) res (i + 1) (n - i - 1)) /. a in
     Float.Array.set res i x;
-    aux (i + 1)
+    aux (i - 1)
   in
-  aux 0;
+  aux (n - 1);
   res
 
 let solve_LU (mat_L : t) (mat_U : t) (b : floatarray) : floatarray = 
