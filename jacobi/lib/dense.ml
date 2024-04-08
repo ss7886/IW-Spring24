@@ -40,13 +40,21 @@ let set_val (matrix : t) (i : int) (j : int) (x : float) : unit =
 let get_row (matrix : t) (i : int) : floatarray =
   Array.get matrix.vals i
 
+let mult_row_vec (matrix : t) (b : floatarray) (row : int) : float =
+  let _ = assert (matrix.num_cols = Float.Array.length b) in
+  dot_product (Array.get matrix.vals row) b
+
 let mult_vec (matrix : t) (b : floatarray) : floatarray =
   let _ = assert (matrix.num_cols = Float.Array.length b) in
   arr_to_floatarr (Array.map (dot_product b) matrix.vals)
 
-let mult_row_vec (matrix : t) (b : floatarray) (row : int) : float =
+let mult_row_vec2 (matrix : t) (b : floatarray) (row : int) : float =
   let _ = assert (matrix.num_cols = Float.Array.length b) in
-  dot_product (Array.get matrix.vals row) b
+  dot_product2 (Array.get matrix.vals row) b
+
+let mult_vec2 (matrix : t) (b : floatarray) : floatarray =
+  let _ = assert (matrix.num_cols = Float.Array.length b) in
+  Float.Array.init matrix.num_rows (fun i -> dot_product2 (Array.get matrix.vals i) b)
 
 let rec decomp_aux (mat_L : t) (mat_U : t) (k : int) : unit = 
   if k = mat_U.num_rows - 1 then () else

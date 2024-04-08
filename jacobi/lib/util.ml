@@ -56,3 +56,24 @@ let partial_dot_product (vec1 : floatarray) (start1 : int) (vec2 : floatarray)
       x1 *. x2 +. aux (i1 + 1) (i2 + 1)
   in
   aux start1 start2
+
+let dot_product2 (vec1 : floatarray) (vec2 : floatarray) : float =
+  let n = Float.Array.length vec1 in
+  let _ = assert (Float.Array.length vec2 = n) in
+  partial_dot_product vec1 0 vec2 0 n
+
+let timer (f: unit -> unit) (iters: int) : unit = 
+  let t = Unix.gettimeofday () in
+  let rec aux (i : int) : unit =
+    if i = iters then () else (
+      f ();
+      aux (i + 1)
+    )
+  in (
+    aux 0;
+    print_string "Time to run ";
+    print_int iters;
+    print_string " iters: ";
+    print_float (Unix.gettimeofday () -. t);
+    print_endline " seconds."
+  )
