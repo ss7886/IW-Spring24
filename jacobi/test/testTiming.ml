@@ -9,23 +9,6 @@ let _ = print_vector
 let _ = Sparse.mult_vec
 let _ = par_mult_vec
 
-
-let timer (f: unit -> unit) (iters: int) : unit = 
-  let t = Unix.gettimeofday () in
-  let rec aux (i : int) : unit =
-    if i = iters then () else (
-      f ();
-      aux (i + 1)
-    )
-  in (
-    aux 0;
-    print_string "Time to run ";
-    print_int iters;
-    print_string " iters: ";
-    print_float (Unix.gettimeofday () -. t);
-    print_endline " seconds."
-  )
-
 let _ = print_endline "Running timing tests"
 let a50 = read_sparse_from_csv "data/A-50-0.1.csv"
 let b50 = read_vec_from_csv "data/b-50-uniform.csv"
@@ -41,11 +24,20 @@ let x1 = jacobi_sparse a10_000 b10_000
 let x2 = jacobi_par_naive 4 a10_000 b10_000
 let _ = assert (vec_eq x1 x2)
 
-let _ = timer (fun _ -> let _ = Sparse.mult_vec a10_000 b10_000 in ()) 100
+let x3 = block_jacobi a10_000 b10_000 10
+let _ = assert (vec_close x1 x3 0.01)
+
+let _ = timer (fun _ -> let _ = jacobi_sparse a10_000 b10_000 in ()) 2
+let _ = timer (fun _ -> let _ = block_jacobi a10_000 b10_000 2 in ()) 2
+let _ = timer (fun _ -> let _ = block_jacobi a10_000 b10_000 5 in ()) 2
+let _ = timer (fun _ -> let _ = block_jacobi a10_000 b10_000 10 in ()) 2
+let _ = timer (fun _ -> let _ = block_jacobi a10_000 b10_000 20 in ()) 2
+
+(* let _ = timer (fun _ -> let _ = Sparse.mult_vec a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 1 a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 2 a10_000 b10_000 in ()) 100
 let _ = timer (fun _ -> let _ = par_mult_vec 4 a10_000 b10_000 in ()) 100
-let _ = timer (fun _ -> let _ = par_mult_vec 8 a10_000 b10_000 in ()) 100
+let _ = timer (fun _ -> let _ = par_mult_vec 8 a10_000 b10_000 in ()) 100 *)
 
 
 (* let _ = timer (fun _ -> let _ = jacobi_sparse a10_000 b10_000 in ()) 20
