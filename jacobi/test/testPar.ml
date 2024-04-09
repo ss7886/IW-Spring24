@@ -13,9 +13,9 @@ let a1000 = read_sparse_from_csv "data/A-1000-0.02.csv"
 let b1000 = read_vec_from_csv "data/b-1000-uniform.csv"
 
 let seq = Sparse.mult_vec a1000 b1000
-let par1 = par_mult_vec 1 a1000 b1000
-let par2 = par_mult_vec 2 a1000 b1000
-let par4 = par_mult_vec 4 a1000 b1000
+let par1 = par_mult_vec a1000 b1000 1
+let par2 = par_mult_vec a1000 b1000 2
+let par4 = par_mult_vec a1000 b1000 4
 
 let _ = assert (vec_eq seq par1)
 let _ = assert (vec_eq seq par2)
