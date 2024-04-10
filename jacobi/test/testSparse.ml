@@ -42,6 +42,12 @@ let csv2 = read_sparse_from_csv "data/A-test2.csv"
 let _ = assert (csv1 = sparse1)
 let _ = assert (csv2 = sparse2)
 
+let csv3 = build_sparse_from_csv "data/A-test1.csv"
+let csv4 = build_sparse_from_csv "data/A-test2.csv"
+
+let _ = assert (csv1 = csv3)
+let _ = assert (csv2 = csv4)
+
 (* let _ = print_vector (mat_vec_mult dense1 b1)
 let _ = print_vector (Matrix.mult_vec sparse1 b1) *)
 

@@ -2,7 +2,11 @@ let listlist_to_arrarr (list :  float list list) : floatarray array =
   Array.of_list (List.map (Float.Array.of_list) list)
 
 let print_vector (vec : floatarray) : unit = 
-  Float.Array.iter (fun x' -> (print_float x'; print_string " ")) vec;
+  Float.Array.iter (fun x -> (Printf.printf "%f " x)) vec;
+  print_newline ()
+
+let print_ints (arr : int array) : unit =
+  Array.iter (fun x -> (Printf.printf "%d " x)) arr;
   print_newline ()
 
 (* Checks whether v1 and v2 are element-wise equal (1e-9 precision). *)

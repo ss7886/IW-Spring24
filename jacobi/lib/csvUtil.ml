@@ -56,3 +56,16 @@ let read_sparse_from_csv (f: string) : Sparse.t =
     aux data' 0 (-1);
     {num_rows=n; num_cols=n; count=entries; vals=vals; cols=cols; row_ptr=rows}
   )
+
+let build_sparse_from_csv (f : string) : Sparse.t =
+  let data = Csv.load f in
+  let n, _, data' = (
+    match data with
+    | line1 :: line2 :: data' -> parse_int line1, parse_int line2, data'
+    | _ -> raise (BadFormat f)
+  ) in
+  let mat_builder = ref (Sparse.new_builder n n) in
+  List.iter (fun line -> 
+    let entry = read_entry line in
+    mat_builder := Sparse.builder_insert (!mat_builder) entry) data';
+  Sparse.build_sparse (!mat_builder)

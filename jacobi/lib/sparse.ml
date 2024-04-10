@@ -7,6 +7,16 @@ type t = {
   row_ptr : int array;
 }
 
+type entry = int * int * float
+
+type builder = {
+    num_rows : int;
+    num_cols : int;
+    count : int;
+    capacity : int;
+    entries : entry array;
+}
+
 let dense_to_sparse (dense : Dense.t) : t = 
   let count_row (count : int) (row : floatarray) : int = 
     Float.Array.fold_left (fun count x -> if x = 0. then count else count + 1) count row
@@ -112,3 +122,80 @@ let diag_block (m : t) (block_size : int) : Dense.t array =
   in
   fill_vals 0;
   res
+
+let new_builder (num_rows : int) (num_cols : int) : builder =
+  let capacity = 8 in
+  let entries = Array.make capacity (0, 0, 0.) in
+  {
+    num_rows=num_rows; num_cols=num_cols; count=0; capacity=capacity; 
+    entries=entries
+  }
+
+let resize_builder (mat_builder : builder) (capacity : int) : builder =
+  let count = mat_builder.count in
+  let _ = assert (capacity >= count) in
+  let new_entries = Array.make capacity (0, 0, 0.) in
+  let _ = Array.blit mat_builder.entries 0 new_entries 0 count in
+  {
+    num_rows=mat_builder.num_rows; num_cols=mat_builder.num_cols; count=count;
+    capacity=capacity; entries=new_entries
+  }
+
+let builder_insert (mat_builder : builder) (new_entry : entry) : builder =
+  let row, col, _ = new_entry in
+  let _ = assert (row >= 0 && row < mat_builder.num_rows) in
+  let _ = assert (col >= 0 && col < mat_builder.num_cols) in
+  let count = mat_builder.count in
+  let capacity = mat_builder.capacity in
+  let mat_builder = if count < capacity then mat_builder 
+    else resize_builder mat_builder (capacity * 2) in
+  let _ = Array.set mat_builder.entries count new_entry in
+  {
+    num_rows=mat_builder.num_rows; num_cols=mat_builder.num_cols;
+    count=count + 1; capacity=mat_builder.capacity; entries=mat_builder.entries
+  }
+
+let compare_entry (a : entry) (b : entry) : int =
+  let row_a, col_a, val_a = a in
+  let row_b, col_b, val_b = b in
+  if row_a = row_b then
+    if col_a = col_b then
+      if val_a = 0. then -1 else if val_b = 0. then 1 else 0
+    else compare col_a col_b
+  else
+    compare row_a row_b
+
+let build_sparse (mat_builder : builder) : t =
+  let num_rows = mat_builder.num_rows in
+  let num_cols = mat_builder.num_cols in
+  let count = mat_builder.count in
+  let entries = mat_builder.entries in
+  let _ = Array.sort compare_entry mat_builder.entries in
+  let skip = mat_builder.capacity - mat_builder.count in
+  let vals = Float.Array.make count 0. in
+  let cols = Array.make count 0 in
+  let row_ptr = Array.make num_rows 0 in
+  let last_row = ref (-1) in
+
+  let populate (index : int) (row, col, value : entry) : unit =
+    let i = index - skip in 
+    if i < 0 then () else (
+      if row > !last_row then
+        let rec update_row (index : int) : unit = 
+          if index > row then () else (
+            Array.set row_ptr index i;
+            last_row := index;
+            update_row (index + 1)
+          )
+        in update_row (!last_row + 1)
+      else ();
+      Float.Array.set vals i value;
+      Array.set cols i col
+    )
+  in
+
+  Array.iteri populate entries;
+  {
+    num_rows=num_rows; num_cols=num_cols; count=count; vals=vals; cols=cols;
+    row_ptr=row_ptr;
+  }

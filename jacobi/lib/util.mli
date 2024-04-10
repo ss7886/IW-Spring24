@@ -1,5 +1,6 @@
 val listlist_to_arrarr : float list list -> floatarray array
 val print_vector : floatarray -> unit
+val print_ints : int array -> unit
 val vec_eq : floatarray -> floatarray -> bool
 val vec_close : floatarray -> floatarray -> float -> bool
 val arr_to_floatarr : float array -> floatarray
