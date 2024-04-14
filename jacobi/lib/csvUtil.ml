@@ -69,3 +69,27 @@ let build_sparse_from_csv (f : string) : Sparse.t =
     let entry = read_entry line in
     mat_builder := Sparse.builder_insert (!mat_builder) entry) data';
   Sparse.build_sparse (!mat_builder)
+
+let read_lines_from_mm (f : string) : string list list =
+  let lines = Array.to_list(Arg.read_arg f) in
+  let filtered = List.filter (fun s -> not (String.starts_with ~prefix:"%" s) && String.length s > 0) lines in
+  List.map (String.split_on_char ' ') filtered
+
+let build_sparse_from_mm (f : string) (symmetric : bool) : Sparse.t =
+  let data = read_lines_from_mm f in
+  let rows, cols, _, entries = (
+    match data with
+    | (str1 :: str2 :: str3 :: []) :: tl -> int_of_string str1, int_of_string str2, int_of_string str3, tl
+    | _ -> raise (BadFormat f)
+  ) in
+  let mat_builder = ref (Sparse.new_builder rows cols) in
+  List.iter (fun line ->
+    let entry = read_entry line in
+    let row, col, x = entry in
+    let row, col = row - 1, col - 1 in
+    mat_builder := Sparse.builder_insert (!mat_builder) (row, col, x);
+    if symmetric && row != col then 
+      mat_builder := Sparse.builder_insert (!mat_builder) (col, row, x) else ()
+  ) entries;
+  let mat = Sparse.build_sparse (!mat_builder) in
+  mat
