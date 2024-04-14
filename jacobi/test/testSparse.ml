@@ -16,6 +16,12 @@ let dense2 = Dense.from_list [
   [0.; 0.; 1.; 0.];
   [0.; 0.; 0.; 1.]
 ]
+let dense3 = Dense.from_list [
+  [1.; 1.; 0.; 0.];
+  [1.; 1.; 1.; 0.];
+  [0.; 1.; 1.; 1.];
+  [0.; 0.; 1.; 1.]
+]
 
 let b1 = Float.Array.of_list [4.3; 3.2; 2.2; 3.1]
 let b2 = Float.Array.of_list [-2.2; 12.5; -0.2; 3.1]
@@ -23,6 +29,7 @@ let b3 = Float.Array.of_list [0.0; 1.0; 2.0; 4.0]
 
 let sparse1 = Sparse.dense_to_sparse dense1
 let sparse2 = Sparse.dense_to_sparse dense2
+let sparse3 = Sparse.dense_to_sparse dense3
 
 let test_sparse (dense : Dense.t) (sparse : Sparse.t) : unit =
   let check_val (row : int) (col : int) (x : float) : unit = 
@@ -47,6 +54,14 @@ let csv4 = build_sparse_from_csv "data/A-test2.csv"
 
 let _ = assert (csv1 = csv3)
 let _ = assert (csv2 = csv4)
+
+let csv5 = build_sparse_from_mm "data/test1.mtx" false
+let csv6 = build_sparse_from_mm "data/test2.mtx" true
+let csv7 = build_sparse_from_mm "data/test_symmetric.mtx" true
+
+let _ = assert (csv1 = csv5)
+let _ = assert (csv2 = csv6)
+let _ = assert (sparse3 = csv7)
 
 (* let _ = print_vector (mat_vec_mult dense1 b1)
 let _ = print_vector (Matrix.mult_vec sparse1 b1) *)
