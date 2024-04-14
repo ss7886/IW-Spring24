@@ -123,6 +123,21 @@ let diag_block (m : t) (block_size : int) : Dense.t array =
   fill_vals 0;
   res
 
+let is_diag_dominant (m : t) : bool =
+  let rec aux_rows (row : int) : bool =
+    if row = m.num_rows then true else (
+      let start = Array.get m.row_ptr row in
+      let stop = if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1) in
+      let rec aux (i : int) (diag : float) (off_diag : float) : bool =
+        if i = stop then (diag > off_diag) else (
+          let x = Float.Array.get m.vals i in
+          let col = Array.get m.cols i in
+          if row = col then aux (i + 1) (diag +. x) off_diag else aux (i + 1) diag (off_diag +. x)
+        )
+      in aux start 0. 0. && aux_rows (row + 1)
+    )
+  in aux_rows 0
+
 let new_builder (num_rows : int) (num_cols : int) : builder =
   let capacity = 8 in
   let entries = Array.make capacity (0, 0, 0.) in

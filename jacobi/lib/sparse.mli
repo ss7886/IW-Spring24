@@ -27,6 +27,8 @@ val mult_row_LU : t -> floatarray -> int -> int -> float
 val diag : t -> floatarray
 val diag_block : t -> int -> Dense.t array
 
+val is_diag_dominant : t -> bool
+
 val new_builder : int -> int -> builder
 val builder_insert : builder -> entry -> builder
 val build_sparse : builder -> t
