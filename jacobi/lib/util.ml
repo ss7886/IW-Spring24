@@ -66,10 +66,10 @@ let dot_product2 (vec1 : floatarray) (vec2 : floatarray) : float =
   let _ = assert (Float.Array.length vec2 = n) in
   partial_dot_product vec1 0 vec2 0 n
 
-let timer (f: unit -> unit) (iters: int) : unit = 
+let timer (f: unit -> 'a) (iters: int) : 'a = 
   let t = Unix.gettimeofday () in
   let rec aux (i : int) : unit =
-    if i = iters then () else (
+    if i = iters - 1 then () else (
       f ();
       aux (i + 1)
     )
@@ -79,5 +79,6 @@ let timer (f: unit -> unit) (iters: int) : unit =
     print_int iters;
     print_string " iters: ";
     print_float (Unix.gettimeofday () -. t);
-    print_endline " seconds."
+    print_endline " seconds.";
+    f ()
   )
