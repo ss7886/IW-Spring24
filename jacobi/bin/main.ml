@@ -3,7 +3,7 @@ open CsvUtil
 open Util
 open SparsePar
 
-let num_processors = [1; 2; 4; 8]
+let num_processors = [1; 2; 4; 8; 16; 32; 64]
 
 let _ = print_string "Reading in test matrices... "
 
