@@ -1,75 +1,51 @@
-let () = print_endline "Hello, World!"
+open JacobiLib
+open CsvUtil
+open Util
+open SparsePar
 
-let rec fibSeq (n: int) : int = 
-  if n = 1 then 0 else
-    if n = 2 then 1 else
-      fibSeq (n - 1) + fibSeq (n - 2)
+let num_processors = [1; 2; 4; 8]
 
-let fibPar (n: int) (p: int) : int = 
-  if n < 20 || p = 1 then (
-    let d1 = Domain.spawn (fun _ -> fibSeq n) in
-    Domain.join d1
-  ) else
-  if p = 2 then (
-    let d1 = Domain.spawn (fun _ -> fibSeq (n - 1)) in
-    let d2 = Domain.spawn (fun _ -> fibSeq (n - 2)) in
-    let r1 = Domain.join d1 in
-    let r2 = Domain.join d2 in
-    r1 + r2
-  ) else
-  if p = 4 then (
-    let d1 = Domain.spawn (fun _ -> fibSeq (n - 4)) in
-    let d2 = Domain.spawn (fun _ -> fibSeq (n - 3)) in
-    let d3 = Domain.spawn (fun _ -> fibSeq (n - 3)) in
-    let d4 = Domain.spawn (fun _ -> fibSeq (n - 2)) in
-    (Domain.join d1) + (Domain.join d2) + (Domain.join d3) + (Domain.join d4)
-  ) else 0 
+let _ = print_string "Reading in test matrices... "
 
-let fibParN (n: int) (p: int) : int = 
-  let d = List.init p (fun _ -> Domain.spawn (fun _ -> fibSeq n)) in
-  let r = List.map Domain.join d in
-  List.nth r 0
+let bcsstk08 = build_sparse_from_mm "data/bcsstk08.mtx" true
+let bcsstk12 = build_sparse_from_mm "data/bcsstk12.mtx" true
+let bcsstk17 = build_sparse_from_mm "data/bcsstk17.mtx" true
+let bcsstk36 = build_sparse_from_mm "data/bcsstk36.mtx" true
+let ct20stif = build_sparse_from_mm "data/ct20stif.mtx" true
+let msc23052 = build_sparse_from_mm "data/msc23052.mtx" true
+let pwtk = build_sparse_from_mm "data/pwtk.mtx" true
 
-let fibTwice (n: int) : int = 
-  let d1 = Domain.spawn (fun _ -> fibSeq n) in
-  let d2 = Domain.spawn (fun _ -> fibSeq n) in
-  let r1 = Domain.join d1 in
-  Printf.printf "fib(%d) = %d\n%!" n r1;
-  let r2 = Domain.join d2 in
-  r2
+let _ = print_endline "Done!"
 
-let timer (f: unit -> unit) (iters: int) : unit = 
-  let t = Sys.time() in
-  let rec aux (i : int) : unit =
-    if i = iters then () else (
-      f ();
-      aux (i + 1)
-    )
-  in (
-    aux 0;
-    print_string "Time to run ";
-    print_int iters;
-    print_string " iters: ";
-    print_float (Sys.time() -. t);
-    print_endline " seconds."
-  )
+let x1 = Float.Array.make bcsstk08.num_cols 1.
+let x2 = Float.Array.make bcsstk12.num_cols 1.
+let x3 = Float.Array.make bcsstk17.num_cols 1.
+let x4 = Float.Array.make bcsstk36.num_cols 1.
+let x5 = Float.Array.make ct20stif.num_cols 1.
+let x6 = Float.Array.make msc23052.num_cols 1.
+let x7 = Float.Array.make pwtk.num_cols 1.
 
-let _ = fibPar
-let _ = fibParN
-let _ = fibTwice
+let testMatrixMultiply (m : Sparse.t) (x : floatarray) (iters : int) (p : int) : unit =
+  Printf.printf "%d processors - " p;
+  timer (fun _ -> let _ = par_mult_vec m x p in ()) iters
 
-(* let _ = timer (fun _ -> let x = fibSeq 42 in (print_int x; print_newline ())) 1
-let _ = timer (fun _ -> let x = fibSeq 41 in (print_int x; print_newline ())) 1
-let _ = timer (fun _ -> let x = fibSeq 40 in (print_int x; print_newline ())) 1
-let _ = timer (fun _ -> let x = fibPar 42 1 in (print_int x; print_newline ())) 1
-let _ = timer (fun _ -> let x = fibPar 42 2 in (print_int x; print_newline ())) 1
-let _ = timer (fun _ -> let x = fibPar 42 4 in (print_int x; print_newline ())) 1
+let _ = Printf.printf "Testing bcsstk08 - n: %d, count: %d\n" bcsstk08.num_rows bcsstk08.count
+let _ = List.iter (testMatrixMultiply bcsstk08 x1 100) num_processors
 
-let _ = timer (fun _ -> let _ = fibParN 42 1 in ()) 1
-let _ = timer (fun _ -> let _ = fibParN 42 2 in ()) 1
-let _ = timer (fun _ -> let _ = fibParN 42 4 in ()) 1 *)
+let _ = Printf.printf "Testing bcsstk12 - n: %d, count: %d\n" bcsstk12.num_rows bcsstk12.count
+let _ = List.iter (testMatrixMultiply bcsstk12 x2 100) num_processors
 
-let _ = timer (fun _ -> let _ = fibSeq 42 in ()) 1
-let _ = timer (fun _ -> let _ = fibTwice 42 in ()) 1
+let _ = Printf.printf "Testing bcsstk17 - n: %d, count: %d\n" bcsstk17.num_rows bcsstk17.count
+let _ = List.iter (testMatrixMultiply bcsstk17 x3 100) num_processors
 
-let _ = print_int (Domain.recommended_domain_count ())
+let _ = Printf.printf "Testing bcsstk36 - n: %d, count: %d\n" bcsstk36.num_rows bcsstk36.count
+let _ = List.iter (testMatrixMultiply bcsstk36 x4 100) num_processors
+
+let _ = Printf.printf "Testing ct20stif - n: %d, count: %d\n" ct20stif.num_rows ct20stif.count
+let _ = List.iter (testMatrixMultiply ct20stif x5 100) num_processors
+
+let _ = Printf.printf "Testing msc23052 - n: %d, count: %d\n" msc23052.num_rows msc23052.count
+let _ = List.iter (testMatrixMultiply msc23052 x6 100) num_processors
+
+let _ = Printf.printf "Testing pwtk - n: %d, count: %d\n" pwtk.num_rows pwtk.count
+let _ = List.iter (testMatrixMultiply pwtk x7 100) num_processors
