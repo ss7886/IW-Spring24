@@ -111,11 +111,9 @@ let _ = print_newline (); print_endline "Timing Jacobi Method:"
 let testJacobiPar (m : Sparse.t) (x : floatarray) (iters : int) (p : int) : unit =
   Printf.printf "%d processors:" p; print_newline();
   print_endline "Block Size 1"; timer (fun _ -> let _ = jacobi_par_naive m x p in ()) iters; print_newline ();
-  print_endline "Block Size 2"; timer (fun _ -> let _ = block_jacobi_par m x 2 p in ()) iters; print_newline ();
   print_endline "Block Size 4"; timer (fun _ -> let _ = block_jacobi_par m x 4 p in ()) iters; print_newline ();
-  print_endline "Block Size 8"; timer (fun _ -> let _ = block_jacobi_par m x 8 p in ()) iters; print_newline ();
   print_endline "Block Size 16"; timer (fun _ -> let _ = block_jacobi_par m x 16 p in ()) iters; print_newline ();
-  print_endline "Block Size 32"; timer (fun _ -> let _ = block_jacobi_par m x 32 p in ()) iters; print_newline ()
+  print_endline "Block Size 64"; timer (fun _ -> let _ = block_jacobi_par m x 64 p in ()) iters; print_newline ()
 
 let _ = Printf.printf "Testing cage12 - n: %d, count: %d\n" cage12.num_rows cage12.count
 let _ = List.iter (testJacobiPar cage12 cage12_b 1) num_processors
