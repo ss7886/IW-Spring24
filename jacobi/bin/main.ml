@@ -19,7 +19,7 @@ let msc23052 = build_sparse_from_mm "data/msc23052.mtx" true
 let pwtk = build_sparse_from_mm "data/pwtk.mtx" true
 let cage12 = build_sparse_from_mm "data/cage12.mtx" false
 let cage13 = build_sparse_from_mm "data/cage13.mtx" false
-(* let cage14 = build_sparse_from_mm "data/cage14.mtx" false *)
+let cage14 = build_sparse_from_mm "data/cage14.mtx" false
 
 let _ = print_endline "Done!"
 
@@ -35,7 +35,7 @@ let _ = if Sparse.is_diag_dominant msc23052 then print_endline "msc23052: T" els
 let _ = if Sparse.is_diag_dominant pwtk then print_endline "pwtk: T" else print_endline "pwtk: F"
 let _ = if Sparse.is_diag_dominant cage12 then print_endline "cage12: T" else print_endline "cage12: F"
 let _ = if Sparse.is_diag_dominant cage13 then print_endline "cage13: T" else print_endline "cage13: F"
-(* let _ = if Sparse.is_diag_dominant cage14 then print_endline "cage14: T" else print_endline "cage14: F" *)
+let _ = if Sparse.is_diag_dominant cage14 then print_endline "cage14: T" else print_endline "cage14: F"
 
 (* Test Matrix Multiply *)
 let _ = print_newline(); print_endline "Timing Matrix Multiplication:"
@@ -49,7 +49,7 @@ let msc23052_b = Float.Array.make msc23052.num_cols 1.
 let pwtk_b = Float.Array.make pwtk.num_cols 1.
 let cage12_b = Float.Array.make cage12.num_cols 1.
 let cage13_b = Float.Array.make cage13.num_cols 1.
-(* let cage14_b = Float.Array.make cage14.num_cols 1. *)
+let cage14_b = Float.Array.make cage14.num_cols 1.
 
 
 let testMatrixMultiply (m : Sparse.t) (x : floatarray) (iters : int) (p : int) : unit =
@@ -83,6 +83,9 @@ let _ = List.iter (testMatrixMultiply cage12 cage12_b 100) num_processors
 let _ = Printf.printf "Testing cage13 - n: %d, count: %d\n" cage13.num_rows cage13.count
 let _ = List.iter (testMatrixMultiply cage13 cage13_b 100) num_processors
 
+let _ = Printf.printf "Testing cage14 - n: %d, count: %d\n" cage14.num_rows cage14.count
+let _ = List.iter (testMatrixMultiply cage14 cage14_b 100) num_processors
+
 (* Testing Jacobi Method *)
 let _ = print_newline (); print_endline "Timing Jacobi Method:"
 
@@ -100,5 +103,5 @@ let _ = List.iter (testJacobiPar cage12 cage12_b 1) num_processors
 let _ = Printf.printf "Testing cage13 - n: %d, count: %d\n" cage13.num_rows cage13.count
 let _ = List.iter (testJacobiPar cage13 cage13_b 1) num_processors
 
-(* let _ = Printf.printf "Testing cage14 - n: %d, count: %d\n" cage14.num_rows cage14.count
-let _ = List.iter (testJacobiPar cage14 cage14_b 1) num_processors *)
+let _ = Printf.printf "Testing cage14 - n: %d, count: %d\n" cage14.num_rows cage14.count
+let _ = List.iter (testJacobiPar cage14 cage14_b 1) num_processors
