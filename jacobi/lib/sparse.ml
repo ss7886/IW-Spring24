@@ -59,28 +59,29 @@ let get_val (m : t) (row : int) (col : int) : float =
 let mult_row_vec (m : t) (b : floatarray) (row : int) : float = 
   let start_index = Array.get m.row_ptr row in
   let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
-  let rec aux (i : int) (stop : int) : float =
-    if i = stop then 0. else
+  let rec aux (i : int) : float =
+    if i = end_index then 0. else
       let m_val = Float.Array.get m.vals i in
       let b_val = Float.Array.get b (Array.get m.cols i) in (
-      m_val *. b_val +. aux (i + 1) stop
+      m_val *. b_val +. aux (i + 1)
       )
-  in aux start_index end_index
+  in aux start_index
 
 let mult_vec (m : t) (b : floatarray) : floatarray =
+  let _ = assert (m.num_cols = Float.Array.length b) in
   Float.Array.init m.num_rows (mult_row_vec m b)
 
 let mult_row_LU (m : t) (b : floatarray) (block_size : int) (row : int) : float = 
   let start_index = Array.get m.row_ptr row in
   let end_index = (if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1)) in
-  let rec aux (i : int) (stop : int) : float =
-    if i = stop then 0. else
+  let rec aux (i : int) : float =
+    if i = end_index then 0. else
       let col = Array.get m.cols i in
-      if row / block_size = col / block_size then 0. +. aux (i + 1) stop else
+      if row / block_size = col / block_size then 0. +. aux (i + 1) else
         let m_val = Float.Array.get m.vals i in
         let b_val = Float.Array.get b col in
-        m_val *. b_val +. aux (i + 1) stop
-  in aux start_index end_index
+        m_val *. b_val +. aux (i + 1)
+  in aux start_index
 
 let mult_LU (m : t) (b : floatarray) (block_size : int) : floatarray = 
   Float.Array.init m.num_rows (mult_row_LU m b block_size)
@@ -130,7 +131,7 @@ let is_diag_dominant (m : t) : bool =
       let stop = if row = m.num_rows - 1 then m.count else Array.get m.row_ptr (row + 1) in
       let rec aux (i : int) (diag : float) (off_diag : float) : bool =
         if i = stop then (diag > off_diag) else (
-          let x = Float.Array.get m.vals i in
+          let x = abs_float (Float.Array.get m.vals i) in
           let col = Array.get m.cols i in
           if row = col then aux (i + 1) (diag +. x) off_diag else aux (i + 1) diag (off_diag +. x)
         )

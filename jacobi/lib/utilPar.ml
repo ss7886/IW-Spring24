@@ -14,26 +14,42 @@ let par_dot_product (v1 : floatarray) (v2 : floatarray) (p : int) : float =
   let results = List.map (Domain.join) domains in
   List.fold_left ( +. ) 0. results
 
-let par_add_vec (v1 : floatarray) (v2 : floatarray) (p : int) : floatarray = 
-  let n = Float.Array.length v1 in
-  let _ = assert (n = Float.Array.length v2) in
+let par_map (f : 'a -> 'b) (arr : 'a array) (p : int) : 'b array =
+  let n = Array.length arr in
   let init_domain (i : int) =
     Domain.spawn (fun _ ->
       let start = i * (n / p) in
       let stop = if i = p - 1 then n else (i + 1) * (n / p) in
-      Float.Array.init (stop - start) (fun i ->
+      Array.init (stop - start) (fun i ->
         let index = i + start in
-        let x1 = Float.Array.get v1 index in
-        let x2 = Float.Array.get v2 index in
-        x1 +. x2
+        let x = Array.get arr index in
+        f x
       )
     )
   in
   let domains = List.init p init_domain in
-  let results = List.map Domain.join domains in
-  Float.Array.concat results
+  let results = List.map (Domain.join) domains in
+  Array.concat results
 
-let par_sub_vec (v1 : floatarray) (v2 : floatarray) (p : int) : floatarray = 
+let par_mapi (f : int -> 'a -> 'b) (arr : 'a array) (p : int) : 'b array =
+  let n = Array.length arr in
+  let init_domain (i : int) =
+    Domain.spawn (fun _ ->
+      let start = i * (n / p) in
+      let stop = if i = p - 1 then n else (i + 1) * (n / p) in
+      Array.init (stop - start) (fun i ->
+        let index = i + start in
+        let x = Array.get arr index in
+        f index x
+      )
+    )
+  in
+  let domains = List.init p init_domain in
+  let results = List.map (Domain.join) domains in
+  Array.concat results
+
+let par_float_map2 (f : float -> float -> float) (v1 : floatarray) (v2 : floatarray) 
+      (p : int) : floatarray = 
   let n = Float.Array.length v1 in
   let _ = assert (n = Float.Array.length v2) in
   let init_domain (i : int) =
@@ -44,7 +60,7 @@ let par_sub_vec (v1 : floatarray) (v2 : floatarray) (p : int) : floatarray =
         let index = i + start in
         let x1 = Float.Array.get v1 index in
         let x2 = Float.Array.get v2 index in
-        x1 -. x2
+        f x1 x2
       )
     )
   in

@@ -91,5 +91,4 @@ let build_sparse_from_mm (f : string) (symmetric : bool) : Sparse.t =
     if symmetric && row != col then 
       mat_builder := Sparse.builder_insert (!mat_builder) (col, row, x) else ()
   ) entries;
-  let mat = Sparse.build_sparse (!mat_builder) in
-  mat
+  Sparse.build_sparse (!mat_builder)

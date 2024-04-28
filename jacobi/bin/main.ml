@@ -2,77 +2,95 @@ open JacobiLib
 open CsvUtil
 open Util
 open SparsePar
+open JacobiPar
 
-let num_processors = [1; 2; 4; 8; 16; 32; 64]
-let _ = num_processors
-let _ = par_mult_vec
-let _ = timer
+let num_processors = [1; 2]
 
-let _ = print_string "Reading in test matrices... "
+(* Load in matrices *)
 
-let af_shell3 = build_sparse_from_mm "data/af_shell3.mtx" true
+let _ = print_string "Loading test matrices..."
+
 let bcsstk08 = build_sparse_from_mm "data/bcsstk08.mtx" true
 let bcsstk12 = build_sparse_from_mm "data/bcsstk12.mtx" true
 let bcsstk17 = build_sparse_from_mm "data/bcsstk17.mtx" true
 let bcsstk36 = build_sparse_from_mm "data/bcsstk36.mtx" true
-let cfd1 = build_sparse_from_mm "data/cfd1.mtx" true
 let ct20stif = build_sparse_from_mm "data/ct20stif.mtx" true
-let ecology2 = build_sparse_from_mm "data/ecology2.mtx" true
-let g3_circuit = build_sparse_from_mm "data/G3_circuit.mtx" true
 let msc23052 = build_sparse_from_mm "data/msc23052.mtx" true
-let nasasrb = build_sparse_from_mm "data/nasasrb.mtx" true
-let nd3k = build_sparse_from_mm "data/nd3k.mtx" true
-let nd6k = build_sparse_from_mm "data/nd6k.mtx" true
 let pwtk = build_sparse_from_mm "data/pwtk.mtx" true
-let shipsec1 = build_sparse_from_mm "data/shipsec1.mtx" true
+let cage12 = build_sparse_from_mm "data/cage12.mtx" false
+let cage13 = build_sparse_from_mm "data/cage13.mtx" false
+(* let cage14 = build_sparse_from_mm "data/cage14.mtx" false *)
 
 let _ = print_endline "Done!"
 
-let _ = if Sparse.is_diag_dominant af_shell3 then print_endline "afshell3: T" else print_endline "afshell3: F"
+(* Checking Diagonal Dominance *)
+let _ = print_endline "Checking Diagonal Dominance of matrices:"
+
 let _ = if Sparse.is_diag_dominant bcsstk08 then print_endline "bcsstk08: T" else print_endline "bcsstk08: F"
 let _ = if Sparse.is_diag_dominant bcsstk12 then print_endline "bcsstk12: T" else print_endline "bcsstk12: F"
 let _ = if Sparse.is_diag_dominant bcsstk17 then print_endline "bcsstk17: T" else print_endline "bcsstk17: F"
 let _ = if Sparse.is_diag_dominant bcsstk36 then print_endline "bcsstk36: T" else print_endline "bcsstk36: F"
-let _ = if Sparse.is_diag_dominant cfd1 then print_endline "cfd1: T" else print_endline "cfd1: F"
 let _ = if Sparse.is_diag_dominant ct20stif then print_endline "ct20stif: T" else print_endline "ct20stif: F"
-let _ = if Sparse.is_diag_dominant ecology2 then print_endline "ecology2: T" else print_endline "ecology2: F"
-let _ = if Sparse.is_diag_dominant g3_circuit then print_endline "g3_circuit: T" else print_endline "g3_circuit: F"
 let _ = if Sparse.is_diag_dominant msc23052 then print_endline "msc23052: T" else print_endline "msc23052: F"
-let _ = if Sparse.is_diag_dominant nasasrb then print_endline "nasasrb: T" else print_endline "nasasrb: F"
-let _ = if Sparse.is_diag_dominant nd3k then print_endline "nd3k: T" else print_endline "nd3k: F"
-let _ = if Sparse.is_diag_dominant nd6k then print_endline "nd6k: T" else print_endline "nd6k: F"
 let _ = if Sparse.is_diag_dominant pwtk then print_endline "pwtk: T" else print_endline "pwtk: F"
-let _ = if Sparse.is_diag_dominant shipsec1 then print_endline "shipsec1: T" else print_endline "shipsec1: F"
+let _ = if Sparse.is_diag_dominant cage12 then print_endline "cage12: T" else print_endline "cage12: F"
+let _ = if Sparse.is_diag_dominant cage13 then print_endline "cage13: T" else print_endline "cage13: F"
+(* let _ = if Sparse.is_diag_dominant cage14 then print_endline "cage14: T" else print_endline "cage14: F" *)
 
-(* let x1 = Float.Array.make bcsstk08.num_cols 1.
-let x2 = Float.Array.make bcsstk12.num_cols 1.
-let x3 = Float.Array.make bcsstk17.num_cols 1.
-let x4 = Float.Array.make bcsstk36.num_cols 1.
-let x5 = Float.Array.make ct20stif.num_cols 1.
-let x6 = Float.Array.make msc23052.num_cols 1.
-let x7 = Float.Array.make pwtk.num_cols 1.
+(* Test Matrix Multiply *)
+let _ = print_newline(); print_endline "Timing Matrix Multiplication:"
+
+let bcsstk08_b = Float.Array.make bcsstk08.num_cols 1.
+let bcsstk12_b = Float.Array.make bcsstk12.num_cols 1.
+let bcsstk17_b = Float.Array.make bcsstk17.num_cols 1.
+let bcsstk36_b = Float.Array.make bcsstk36.num_cols 1.
+let ct20stif_b = Float.Array.make ct20stif.num_cols 1.
+let msc23052_b = Float.Array.make msc23052.num_cols 1.
+let pwtk_b = Float.Array.make pwtk.num_cols 1.
+let cage12_b = Float.Array.make cage12.num_cols 1.
+let cage13_b = Float.Array.make cage13.num_cols 1.
+(* let cage14_b = Float.Array.make cage14.num_cols 1. *)
+
 
 let testMatrixMultiply (m : Sparse.t) (x : floatarray) (iters : int) (p : int) : unit =
   Printf.printf "%d processors - " p;
   timer (fun _ -> let _ = par_mult_vec m x p in ()) iters
 
 let _ = Printf.printf "Testing bcsstk08 - n: %d, count: %d\n" bcsstk08.num_rows bcsstk08.count
-let _ = List.iter (testMatrixMultiply bcsstk08 x1 100) num_processors
+let _ = List.iter (testMatrixMultiply bcsstk08 bcsstk08_b 100) num_processors
 
 let _ = Printf.printf "Testing bcsstk12 - n: %d, count: %d\n" bcsstk12.num_rows bcsstk12.count
-let _ = List.iter (testMatrixMultiply bcsstk12 x2 100) num_processors
+let _ = List.iter (testMatrixMultiply bcsstk12 bcsstk12_b 100) num_processors
 
 let _ = Printf.printf "Testing bcsstk17 - n: %d, count: %d\n" bcsstk17.num_rows bcsstk17.count
-let _ = List.iter (testMatrixMultiply bcsstk17 x3 100) num_processors
+let _ = List.iter (testMatrixMultiply bcsstk17 bcsstk17_b 100) num_processors
 
 let _ = Printf.printf "Testing bcsstk36 - n: %d, count: %d\n" bcsstk36.num_rows bcsstk36.count
-let _ = List.iter (testMatrixMultiply bcsstk36 x4 100) num_processors
+let _ = List.iter (testMatrixMultiply bcsstk36 bcsstk36_b 100) num_processors
 
 let _ = Printf.printf "Testing ct20stif - n: %d, count: %d\n" ct20stif.num_rows ct20stif.count
-let _ = List.iter (testMatrixMultiply ct20stif x5 100) num_processors
+let _ = List.iter (testMatrixMultiply ct20stif ct20stif_b 100) num_processors
 
 let _ = Printf.printf "Testing msc23052 - n: %d, count: %d\n" msc23052.num_rows msc23052.count
-let _ = List.iter (testMatrixMultiply msc23052 x6 100) num_processors
+let _ = List.iter (testMatrixMultiply msc23052 msc23052_b 100) num_processors
 
 let _ = Printf.printf "Testing pwtk - n: %d, count: %d\n" pwtk.num_rows pwtk.count
-let _ = List.iter (testMatrixMultiply pwtk x7 100) num_processors *)
+let _ = List.iter (testMatrixMultiply pwtk pwtk_b 100) num_processors
+
+(* Testing Jacobi Method *)
+let _ = print_newline (); print_endline "Timing Jacobi Method:"
+
+let testJacobiPar (m : Sparse.t) (x : floatarray) (iters : int) (p : int) : unit =
+  Printf.printf "%d processors:" p; print_newline();
+  timer (fun _ -> let _ = jacobi_par_naive m x p in ()) iters; print_newline ();
+  timer (fun _ -> let _ = block_jacobi_par m x 2 p in ()) iters; print_newline ();
+  timer (fun _ -> let _ = block_jacobi_par m x 4 p in ()) iters; print_newline ()
+
+let _ = Printf.printf "Testing cage12 - n: %d, count: %d\n" cage12.num_rows cage12.count
+let _ = List.iter (testJacobiPar cage12 cage12_b 1) num_processors
+
+let _ = Printf.printf "Testing cage13 - n: %d, count: %d\n" cage13.num_rows cage13.count
+let _ = List.iter (testJacobiPar cage13 cage13_b 1) num_processors
+
+(* let _ = Printf.printf "Testing cage14 - n: %d, count: %d\n" cage14.num_rows cage14.count
+let _ = List.iter (testJacobiPar cage14 cage14_b 1) num_processors *)

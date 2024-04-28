@@ -54,7 +54,7 @@ let mult_row_vec2 (matrix : t) (b : floatarray) (row : int) : float =
 
 let mult_vec2 (matrix : t) (b : floatarray) : floatarray =
   let _ = assert (matrix.num_cols = Float.Array.length b) in
-  Float.Array.init matrix.num_rows (fun i -> dot_product2 (Array.get matrix.vals i) b)
+  Float.Array.init matrix.num_rows (fun i -> dot_product2 (get_row matrix i) b)
 
 let rec decomp_aux (mat_L : t) (mat_U : t) (k : int) : unit = 
   if k = mat_U.num_rows - 1 then () else
@@ -138,5 +138,5 @@ let solve_U (mat_U : t) (b : floatarray) : floatarray =
   res
 
 let solve_LU (mat_L : t) (mat_U : t) (b : floatarray) : floatarray = 
-  let b1 = solve_L mat_L b in
-  solve_U mat_U b1
+  let y = solve_L mat_L b in
+  solve_U mat_U y

@@ -70,15 +70,16 @@ let timer (f: unit -> 'a) (iters: int) : 'a =
   let t = Unix.gettimeofday () in
   let rec aux (i : int) : unit =
     if i = iters - 1 then () else (
-      f ();
+      let _ = f () in
       aux (i + 1)
     )
   in (
+    let res = f () in
     aux 0;
     print_string "Time to run ";
     print_int iters;
     print_string " iters: ";
     print_float (Unix.gettimeofday () -. t);
     print_endline " seconds.";
-    f ()
+    res
   )

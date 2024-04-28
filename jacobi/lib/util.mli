@@ -8,4 +8,4 @@ val dot_product : floatarray -> floatarray -> float
 val partial_dot_product : floatarray -> int -> floatarray -> int -> int -> float
 val dot_product2 : floatarray -> floatarray -> float
 
-val timer : (unit -> unit) -> int -> unit
+val timer : (unit -> 'a) -> int -> 'a
