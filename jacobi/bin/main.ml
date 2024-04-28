@@ -77,6 +77,12 @@ let _ = List.iter (testMatrixMultiply msc23052 msc23052_b 100) num_processors
 let _ = Printf.printf "Testing pwtk - n: %d, count: %d\n" pwtk.num_rows pwtk.count
 let _ = List.iter (testMatrixMultiply pwtk pwtk_b 100) num_processors
 
+let _ = Printf.printf "Testing cage12 - n: %d, count: %d\n" cage12.num_rows cage12.count
+let _ = List.iter (testMatrixMultiply cage12 cage12_b 100) num_processors
+
+let _ = Printf.printf "Testing cage13 - n: %d, count: %d\n" cage13.num_rows cage13.count
+let _ = List.iter (testMatrixMultiply cage13 cage13_b 100) num_processors
+
 (* Testing Jacobi Method *)
 let _ = print_newline (); print_endline "Timing Jacobi Method:"
 
