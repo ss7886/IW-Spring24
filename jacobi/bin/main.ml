@@ -39,57 +39,23 @@ let _ = if Sparse.is_diag_dominant cage13 then print_endline "cage13: T" else pr
 let _ = if Sparse.is_diag_dominant cage14 then print_endline "cage14: T" else print_endline "cage14: F"
 
 (* Test Vector Operations *)
-let int_10_000 = Array.init 10_000 Fun.id
-let int_100_000 = Array.init 100_000 Fun.id
-let int_1_000_000 = Array.init 1_000_000 Fun.id
-let int_10_000_000 = Array.init 10_000_000 Fun.id
-let int_100_000_000 = Array.init 100_000_000 Fun.id
-
-let float_10_000 = Float.Array.init 10_000 float_of_int
 let float_100_000 = Float.Array.init 100_000 float_of_int
 let float_1_000_000 = Float.Array.init 1_000_000 float_of_int
 let float_10_000_000 = Float.Array.init 10_000_000 float_of_int
-let float_100_000_000 = Float.Array.init 100_000_000 float_of_int
 
-let testIntOperations (x : int array) (iters : int) (p : int) : unit =
-  Printf.printf "%d processors - " p;
-  timer (fun _ -> let _ = par_map (fun x -> 2 * x) x p in ()) iters;
-  timer (fun _ -> let _ = par_mapi (fun i x -> i + x) x p in ()) iters
-
-let testFloatOperations (x : floatarray) (iters : int) (p : int) : unit =
+let testVectorOps (x : floatarray) (iters : int) (p : int) : unit =
   Printf.printf "%d processors - " p;
   timer (fun _ -> let _ = par_dot_product x x p in ()) iters;
   timer (fun _ -> let _ = par_float_map2 ( +. ) x x p in ()) iters
 
-let _ = print_endline "Testing int array - n: 10,000"
-let _ = List.iter (testIntOperations int_10_000 10_000) num_processors
-
-let _ = print_endline "Testing int array - n: 100,000"
-let _ = List.iter (testIntOperations int_100_000 1000) num_processors
-
-let _ = print_endline "Testing int array - n: 1,000,000"
-let _ = List.iter (testIntOperations int_1_000_000 100) num_processors
-
-let _ = print_endline "Testing int array - n: 10,000,000"
-let _ = List.iter (testIntOperations int_10_000_000 10) num_processors
-
-let _ = print_endline "Testing int array - n: 100,000,000"
-let _ = List.iter (testIntOperations int_100_000_000 1) num_processors
-
-let _ = print_endline "Testing floatarray - n: 10,000"
-let _ = List.iter (testFloatOperations float_10_000 10_000) num_processors
-
 let _ = print_endline "Testing floatarray - n: 100,000"
-let _ = List.iter (testFloatOperations float_100_000 1000) num_processors
+let _ = List.iter (testVectorOps float_100_000 100) num_processors
 
 let _ = print_endline "Testing floatarray - n: 1,000,000"
-let _ = List.iter (testFloatOperations float_1_000_000 100) num_processors
+let _ = List.iter (testVectorOps float_1_000_000 10) num_processors
 
 let _ = print_endline "Testing floatarray - n: 10,000,000"
-let _ = List.iter (testFloatOperations float_10_000_000 10) num_processors
-
-let _ = print_endline "Testing floatarray - n: 100,000,000"
-let _ = List.iter (testFloatOperations float_100_000_000 1) num_processors
+let _ = List.iter (testVectorOps float_10_000_000 1) num_processors
 
 (* Test Matrix Multiply *)
 let _ = print_newline(); print_endline "Timing Matrix Multiplication:"
