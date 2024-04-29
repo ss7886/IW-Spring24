@@ -48,23 +48,25 @@ let par_mapi (f : int -> 'a -> 'b) (arr : 'a array) (p : int) : 'b array =
   let results = List.map (Domain.join) domains in
   Array.concat results
 
-let par_float_map2 (f : float -> float -> float) (v1 : floatarray) (v2 : floatarray) 
-      (p : int) : floatarray = 
-  let n = Float.Array.length v1 in
-  let _ = assert (n = Float.Array.length v2) in
+let par_float_map2 (f : float -> float -> float) (vec1 : floatarray) 
+      (vec2 : floatarray) (p : int) : floatarray = 
+  let n = Float.Array.length vec1 in
+  let _ = assert (n = Float.Array.length vec2) in
+  let results = Float.Array.make n 0. in
   let init_domain (i : int) =
     Domain.spawn (fun _ ->
       let start = i * (n / p) in
       let stop = if i = p - 1 then n else (i + 1) * (n / p) in
-      Float.Array.init (stop - start) (fun i ->
+      let sub = Float.Array.init (stop - start) (fun i ->
         let index = i + start in
-        let x1 = Float.Array.get v1 index in
-        let x2 = Float.Array.get v2 index in
+        let x1 = Float.Array.get vec1 index in
+        let x2 = Float.Array.get vec2 index in
         f x1 x2
-      )
+      ) in
+      Float.Array.blit sub 0 results start (stop - start)
     )
   in
   let domains = List.init p init_domain in
-  let results = List.map Domain.join domains in
-  Float.Array.concat results
+  let _ = List.iter Domain.join domains in
+  results
   
